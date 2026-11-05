@@ -1,6 +1,14 @@
-# Next.js template
+# Ierri
 
-This is a Next.js template with shadcn/ui.
+Interface Review - **Share. Review. Inspire.**
+
+Rede social pública de interfaces e design, construída com Next.js e shadcn/ui.
+
+## Documentação do produto
+
+Consulte a [Identidade Visual e Diretrizes de Desenvolvimento](docs/identidade-visual.md) para a referência permanente de marca, paleta, tipografia, componentes, experiência, acessibilidade e desenvolvimento.
+
+As instruções para agentes ficam em [AGENTS.md](AGENTS.md). A visão documentada orienta futuras implementações; funcionalidades devem ser desenvolvidas apenas dentro do escopo solicitado.
 
 ## Adding components
 
