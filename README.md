@@ -27,3 +27,7 @@ To use the components in your app, import them as follows:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
+
+## CI/CD
+
+Os workflows validam o projeto, publicam imagens no GHCR e acionam o Coolify: `staging` para homologação e `main` para produção. Consulte [Configuração do CI/CD](docs/ci-cd.md) para os secrets, variáveis e passos manuais no team Lucas.
