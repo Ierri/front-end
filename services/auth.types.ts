@@ -19,10 +19,22 @@ export type AuthUserPreview = {
 export type EmailLookupResult =
   { nextStep: "login"; user: AuthUserPreview } | { nextStep: "register" }
 
-export type AuthResult = { message: string }
+export type AuthUser = {
+  id: string
+  name: string
+  email: string
+  username: string
+  bio?: string
+  avatarUrl?: string
+  createdAt: string
+}
 
-// Frontend interface. The eventual HTTP adapter must map the actual API contract.
+export type AuthResult = { message: string; user: AuthUser }
+
+// Frontend interface mapped to the API by the HTTP adapter.
 export interface AuthService {
+  me(): Promise<AuthUser | null>
+  logout(): Promise<void>
   checkEmail(values: EmailValues): Promise<EmailLookupResult>
   login(values: LoginValues): Promise<AuthResult>
   register(values: RegistrationPayload): Promise<AuthResult>

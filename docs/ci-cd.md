@@ -42,6 +42,7 @@ Configure estas **variables em cada environment**:
 | Variável | Valor |
 | --- | --- |
 | `SITE_URL` | Origem pública real do ambiente, incluindo `https://` |
+| `NEXT_PUBLIC_API_URL` | URL pública do NestJS, incluindo `https://`; incorporada ao build |
 | `COOLIFY_DEPLOY_WEBHOOK` | URL “Deploy Webhook (auth required)” da aplicação correspondente |
 | `COOLIFY_DEPLOY_ENABLED` | `true` apenas depois que a aplicação estiver pronta no Coolify |
 
