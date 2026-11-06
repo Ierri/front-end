@@ -122,13 +122,7 @@ export function AuthForm() {
   return (
     <CredentialsForm
       key={flow.nextStep}
-      onAuthenticated={(result) => {
-        if (flow.nextStep === "register") {
-          router.replace("/")
-          return
-        }
-        setSession(result.user)
-      }}
+      onAuthenticated={() => router.replace("/")}
       mode={flow.nextStep}
       email={flow.email}
       user={flow.nextStep === "login" ? flow.user : undefined}
