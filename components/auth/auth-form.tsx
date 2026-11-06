@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { CredentialsForm } from "./credentials-form"
 import { EmailForm } from "./email-form"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ type AuthFlow =
   | ({ step: "credentials"; email: string } & EmailLookupResult)
 
 export function AuthForm() {
+  const router = useRouter()
   const [session, setSession] = useState<AuthUser | null>(null)
   const [checking, setChecking] = useState(true)
   const [error, setError] = useState("")
@@ -120,7 +122,13 @@ export function AuthForm() {
   return (
     <CredentialsForm
       key={flow.nextStep}
-      onAuthenticated={(result) => setSession(result.user)}
+      onAuthenticated={(result) => {
+        if (flow.nextStep === "register") {
+          router.replace("/")
+          return
+        }
+        setSession(result.user)
+      }}
       mode={flow.nextStep}
       email={flow.email}
       user={flow.nextStep === "login" ? flow.user : undefined}

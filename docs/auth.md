@@ -27,7 +27,7 @@ Execute `bun run start:dev` no back-end e `bun run dev` no front-end. Reinicie o
 2. `POST /auth/check-email` retorna o perfil resumido para login. Somente `USER_NOT_FOUND` direciona para cadastro.
 3. `POST /auth/login` e `POST /auth/register` autenticam o usuário. O cadastro envia nome, e-mail e senha; a confirmação fica no formulário.
 4. O NestJS grava o JWT em cookie HttpOnly com duração de 15 minutos e `Secure` em produção. O serviço não armazena tokens ou senhas no localStorage ou sessionStorage. O contrato Bearer existente continua disponível para outros clientes.
-5. Após autenticar, `/auth` mostra o usuário conectado e a opção de sair. Não há redirecionamento para uma página de produto ainda não implementada.
+5. Após o cadastro, o usuário é redirecionado à página inicial (`/`) com `router.replace`, mantendo a sessão criada pelo NestJS. Após o login, `/auth` mostra o usuário conectado e a opção de sair.
 6. `POST /auth/logout` remove o cookie. Não há refresh token nem revogação de JWTs já emitidos; a sessão termina após o prazo e requer novo login.
 
 O NestJS permite CORS com credenciais somente para as origens configuradas e rejeita mutações com origem externa ou `Sec-Fetch-Site: cross-site`.
