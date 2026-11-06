@@ -20,3 +20,5 @@ Leia [Identidade Visual e Diretrizes de Desenvolvimento](docs/identidade-visual.
 - Em pedidos apenas de documentação ou configuração, não implemente telas nem altere a aparência da aplicação.
 
 O kit oficial está integrado em `public/brand/ierri/`. Consulte também `docs/brand-kit/GUIA-DA-MARCA.md` e `docs/brand-kit/INSTRUCOES-PARA-CODEX.md` ao trabalhar com os recursos da marca. Os caminhos públicos e a configuração de compartilhamento estão na seção 17 de `docs/identidade-visual.md`.
+
+Use Tailwind CSS para estilizar páginas e componentes, incluindo efeitos visuais. Não criar CSS Modules (`*.module.css`). Reutilize os tokens semânticos e mantenha no CSS global apenas o tema e regras globais necessárias.

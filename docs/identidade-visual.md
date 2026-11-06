@@ -354,10 +354,10 @@ O tema do Ierri está definido nos tokens semânticos existentes em `app/globals
 | Texto de destaque e links | `text-accent-foreground` | Coral escuro `#C72C20` |
 | Erro ou ação destrutiva | `text-destructive` | Coral escuro `#C72C20` |
 | Separadores | `border-border` | Cinza borda `#E5E5E5` |
-| Contorno de campos | `border-input` | Cinza `#6B6B6B` |
+| Contorno de campos | `border-input` | Cinza borda `#E5E5E5` |
 | Indicador de foco | `ring-ring` | Coral escuro `#C72C20` |
 
-O coral principal com texto branco não oferece contraste suficiente para texto pequeno. Botões principais usam grafite sobre coral; links usam coral escuro. Os contornos de campos são mais contrastantes que separadores decorativos.
+O coral principal com texto branco não oferece contraste suficiente para texto pequeno. Botões principais usam grafite sobre coral; links usam coral escuro. Os contornos de campos são discretos, usando cinza borda no tema claro; o foco permanece destacado em coral.
 
 O modo claro é o padrão para novos visitantes. A preferência de tema salva continua sendo respeitada, e o modo escuro permanece disponível pelo provedor existente. No escuro, superfícies e bordas usam tons neutros escuros, texto secundário usa cinza claro e o destaque suave usa coral escurecido; essas adaptações preservam contraste e a assinatura coral.
 

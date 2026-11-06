@@ -22,7 +22,7 @@
   --accent-foreground: #c72c20;
   --destructive: #c72c20;
   --border: #e5e5e5;
-  --input: #6b6b6b;
+  --input: #e5e5e5;
   --ring: #c72c20;
   --chart-1: #ff4d3d;
   --chart-2: #171717;
@@ -57,8 +57,8 @@
   --accent: #3d2522;
   --accent-foreground: #fff0ed;
   --destructive: #ff4d3d;
-  --border: #3d3d3d;
-  --input: #808080;
+  --border: #333333;
+  --input: #3d3d3d;
   --ring: #ff4d3d;
   --chart-1: #ff4d3d;
   --chart-2: #faf9f6;
@@ -71,7 +71,7 @@
   --sidebar-primary-foreground: #171717;
   --sidebar-accent: #3d2522;
   --sidebar-accent-foreground: #fff0ed;
-  --sidebar-border: #3d3d3d;
+  --sidebar-border: #333333;
   --sidebar-ring: #ff4d3d;
 }
 
