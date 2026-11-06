@@ -4,6 +4,7 @@ import { Geist_Mono, Inter, Space_Grotesk } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { pageMetadata, siteTitle, siteUrl } from "@/lib/metadata"
 
 const spaceGroteskHeading = Space_Grotesk({
   subsets: ["latin"],
@@ -17,20 +18,11 @@ const fontMono = Geist_Mono({
   variable: "--font-geist-mono",
 })
 
-const title = "Ierri - Share. Review. Inspire."
-const description =
-  "Compartilhe interfaces, descubra projetos e troque feedbacks com uma comunidade de designers, desenvolvedores e criadores digitais."
-const siteUrl =
-  process.env.SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000")
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  ...pageMetadata({ path: "/" }),
+  metadataBase: siteUrl,
   applicationName: "Ierri",
-  title: { default: title, template: "%s | Ierri" },
-  description,
+  title: { default: siteTitle, template: "%s | Ierri" },
   manifest: "/brand/ierri/icons/site.webmanifest",
   icons: {
     icon: [
@@ -51,32 +43,6 @@ export const metadata: Metadata = {
         url: "/brand/ierri/icons/apple-touch-icon.png",
         sizes: "180x180",
         type: "image/png",
-      },
-    ],
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Ierri",
-    locale: "pt_BR",
-    title,
-    description,
-    images: [
-      {
-        url: "/brand/ierri/social/open-graph-1200x630.png",
-        width: 1200,
-        height: 630,
-        alt: "Ierri - Interface Review. Share. Review. Inspire.",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [
-      {
-        url: "/brand/ierri/social/open-graph-1200x630.png",
-        alt: "Ierri - Share. Review. Inspire.",
       },
     ],
   },

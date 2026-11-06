@@ -388,6 +388,6 @@ O favicon padrão do Next.js em `app/favicon.ico` foi substituído pelo oficial.
 
 ### URL de publicação
 
-Configure `SITE_URL` com a origem pública real do site em produção (incluindo `https://`). Essa variável define a base das URLs absolutas de compartilhamento. Em Vercel, `VERCEL_PROJECT_PRODUCTION_URL` é usado como alternativa; no ambiente local, a base é `http://localhost:3000`. Não inventar um domínio oficial para a marca.
+Configure `SITE_URL` com a origem pública real do site em produção (incluindo `https://`). Essa variável define a base das URLs absolutas de compartilhamento. A hospedagem usa infraestrutura própria, com `SITE_URL` configurada no build Docker. No ambiente local, a base padrão é `http://localhost:3000`. Não inventar um domínio oficial para a marca.
 
 A paleta e as fontes já configuradas correspondem ao guia do kit. Manter o par `bg-primary text-primary-foreground` e a escolha de contraste documentada acima.

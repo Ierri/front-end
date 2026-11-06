@@ -1,4 +1,4 @@
-# CI/CD — GitHub Actions, GHCR e Coolify
+# CI/CD - GitHub Actions, GHCR e Coolify
 
 O GitHub valida o projeto, constrói e testa o container, publica no GHCR e solicita o deploy ao Coolify. A configuração das aplicações no Coolify é manual, no team **Lucas**.
 

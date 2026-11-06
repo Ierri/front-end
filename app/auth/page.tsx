@@ -4,11 +4,16 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 import { AuthForm } from "@/components/auth/auth-form"
+import { pageMetadata } from "@/lib/metadata"
 
 export const metadata: Metadata = {
+  ...pageMetadata({
+    path: "/auth",
+    title: "Entre na comunidade | Ierri",
+    description:
+      "Seu próximo projeto merece ser visto. Entre no Ierri ou crie sua conta para compartilhar interfaces e trocar ideias com a comunidade.",
+  }),
   title: "Entre na comunidade",
-  description:
-    "Entre no Ierri ou crie sua conta para compartilhar interfaces, trocar ideias e encontrar sua próxima inspiração.",
   robots: { index: false, follow: true },
 }
 
