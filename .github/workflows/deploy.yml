@@ -85,7 +85,8 @@ jobs:
             exit 1
           fi
           curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
-            --request GET "$COOLIFY_DEPLOY_WEBHOOK" \
+            --request POST "$COOLIFY_DEPLOY_WEBHOOK" \
+            --header "Accept: application/json" \
             --header "Authorization: Bearer $COOLIFY_TOKEN" \
             --output "$RUNNER_TEMP/coolify-deploy.json"
           echo "Deploy solicitado ao Coolify. Confirme a conclusão no painel da aplicação."
