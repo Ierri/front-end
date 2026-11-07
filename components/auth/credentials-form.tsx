@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { authService } from "@/lib/auth/service"
-import type { AuthUserPreview } from "@/lib/auth/types"
+import { authService } from "@/services/auth"
+import { ApiError } from "@/services/api"
+import type { AuthResult, AuthUserPreview } from "@/services/auth.types"
 import { loginSchema, registerSchema } from "@/lib/validations/auth"
 import {
   focusFirstInvalidField,
@@ -19,16 +20,17 @@ export function CredentialsForm({
   user,
   email,
   onBack,
+  onAuthenticated,
 }: {
   mode: "login" | "register"
   user?: AuthUserPreview
   email: string
+  onAuthenticated: (result: AuthResult) => void
   onBack: () => void
 }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [notice, setNotice] = useState("")
   const [requestError, setRequestError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isRegistering = mode === "register"
@@ -38,7 +40,6 @@ export function CredentialsForm({
     if (isSubmitting) return
     const form = event.currentTarget
     const values = Object.fromEntries(new FormData(form))
-    setNotice("")
     setRequestError("")
     const validation = isRegistering
       ? { mode: "register" as const, ...registerSchema.safeParse(values) }
@@ -60,15 +61,24 @@ export function CredentialsForm({
               password: validation.data.password,
             })
           : await authService.login(validation.data)
-      setNotice(result.message)
+      onAuthenticated(result)
       form.reset()
       setShowPassword(false)
       setShowConfirmation(false)
-    } catch {
+    } catch (error) {
+      if (error instanceof ApiError) {
+        const fieldErrors = Object.fromEntries(
+          error.details.map(({ field, message }) => [field, message])
+        )
+        setErrors(fieldErrors)
+        focusFirstInvalidField(form, fieldErrors)
+      }
       setRequestError(
-        isRegistering
-          ? "Não foi possível criar sua conta. Tente novamente."
-          : "Não foi possível entrar. Confira seus dados e tente novamente."
+        error instanceof Error
+          ? error.message
+          : isRegistering
+            ? "Não foi possível criar sua conta. Tente novamente."
+            : "Não foi possível entrar. Confira seus dados e tente novamente."
       )
     } finally {
       setIsSubmitting(false)
@@ -123,7 +133,6 @@ export function CredentialsForm({
         onSubmit={handleCredentialsSubmit}
         onChange={() => {
           setErrors({})
-          setNotice("")
           setRequestError("")
         }}
         className="space-y-4"
@@ -282,14 +291,6 @@ export function CredentialsForm({
           <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <p>{requestError}</p>
         </div>
-      )}
-      {notice && (
-        <p
-          role="status"
-          className="mt-4 rounded-lg border border-border bg-secondary p-3 text-xs leading-relaxed"
-        >
-          {notice}
-        </p>
       )}
     </>
   )

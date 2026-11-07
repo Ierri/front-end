@@ -1,4 +1,4 @@
-# CI/CD — GitHub Actions, GHCR e Coolify
+# CI/CD - GitHub Actions, GHCR e Coolify
 
 O GitHub valida o projeto, constrói e testa o container, publica no GHCR e solicita o deploy ao Coolify. A configuração das aplicações no Coolify é manual, no team **Lucas**.
 
@@ -42,6 +42,7 @@ Configure estas **variables em cada environment**:
 | Variável | Valor |
 | --- | --- |
 | `SITE_URL` | Origem pública real do ambiente, incluindo `https://` |
+| `NEXT_PUBLIC_API_URL` | URL pública do NestJS, incluindo `https://`; incorporada ao build |
 | `COOLIFY_DEPLOY_WEBHOOK` | URL “Deploy Webhook (auth required)” da aplicação correspondente |
 | `COOLIFY_DEPLOY_ENABLED` | `true` apenas depois que a aplicação estiver pronta no Coolify |
 

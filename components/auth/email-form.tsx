@@ -5,8 +5,8 @@ import { AtSign, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { authService } from "@/lib/auth/service"
-import type { EmailLookupResult } from "@/lib/auth/types"
+import { authService } from "@/services/auth"
+import type { EmailLookupResult } from "@/services/auth.types"
 import { emailSchema } from "@/lib/validations/auth"
 
 export function EmailForm({
@@ -39,8 +39,12 @@ export function EmailForm({
     try {
       const result = await authService.checkEmail(validation.data)
       onContinue(validation.data.email, result)
-    } catch {
-      setRequestError("O acesso por e-mail ainda não está disponível.")
+    } catch (error) {
+      setRequestError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível consultar seu e-mail."
+      )
     } finally {
       setIsSubmitting(false)
     }

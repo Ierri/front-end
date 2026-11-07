@@ -10,7 +10,13 @@ const email = z
 export const emailSchema = z.object({ email })
 
 export const loginSchema = emailSchema.extend({
-  password: z.string().min(1, "Digite sua senha para entrar."),
+  password: z
+    .string()
+    .min(1, "Digite sua senha para entrar.")
+    .refine(
+      (value) => new TextEncoder().encode(value).length <= 72,
+      "A senha deve ter no máximo 72 bytes."
+    ),
 })
 
 export const registerSchema = emailSchema
@@ -23,7 +29,11 @@ export const registerSchema = emailSchema
     password: z
       .string()
       .min(1, "Crie uma senha para sua conta.")
-      .min(8, "Sua senha precisa ter pelo menos 8 caracteres."),
+      .min(8, "Sua senha precisa ter pelo menos 8 caracteres.")
+      .refine(
+        (value) => new TextEncoder().encode(value).length <= 72,
+        "A senha deve ter no máximo 72 bytes."
+      ),
     confirmPassword: z
       .string()
       .min(1, "Digite sua senha novamente para confirmar."),

@@ -13,6 +13,8 @@ RUN bun install --frozen-lockfile
 FROM dependencies AS builder
 COPY . .
 # Public origin only. Credentials must never be passed as build arguments.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ARG SITE_URL
 ENV SITE_URL=${SITE_URL}
 RUN bun run build
