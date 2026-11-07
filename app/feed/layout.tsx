@@ -9,13 +9,16 @@ export const metadata: Metadata = {
 
 export default function FeedLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode
+  modal: React.ReactNode
 }>) {
   return (
     <div className="min-h-svh bg-background">
       <FeedHeader />
       {children}
+      {modal}
     </div>
   )
 }

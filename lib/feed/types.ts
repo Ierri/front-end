@@ -13,16 +13,31 @@ export type FeedUserData = {
   avatar: string
 }
 
+export type FeedMediaData = {
+  id: string
+  type: "image" | "video"
+  src: string
+  alt: string
+  poster?: string
+}
+
+export type FeedCommentData = {
+  id: string
+  author: FeedUserData
+  technologies: TechnologyKey[]
+  content: string
+  time: string
+  replies: FeedCommentData[]
+}
+
 export type FeedPostData = {
   id: string
   author: FeedUserData
   content: string
   technologies: TechnologyKey[]
-  media: {
-    src: string
-    alt: string
-  }
+  media: FeedMediaData[]
   score: number
+  comments: FeedCommentData[]
 }
 
 export type RecommendedUserData = {

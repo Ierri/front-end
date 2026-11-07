@@ -5,11 +5,12 @@ import { cn } from "@/lib/utils"
 type FeedUserAvatarProps = {
   src: string
   name: string
-  size?: "default" | "large"
+  size?: "small" | "default" | "large"
   priority?: boolean
 }
 
 const avatarSizes = {
+  small: { pixels: 32, className: "size-8" },
   default: { pixels: 40, className: "size-10" },
   large: { pixels: 44, className: "size-11" },
 } as const
