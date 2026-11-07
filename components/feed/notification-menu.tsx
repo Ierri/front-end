@@ -16,7 +16,7 @@ export function NotificationMenu() {
 
       <section
         aria-label="Notificações fictícias"
-        className="absolute top-full right-0 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg"
+        className="fixed inset-x-4 top-16 z-20 mt-3 w-auto overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg md:absolute md:inset-x-auto md:top-full md:right-0 md:w-[min(22rem,calc(100vw-2rem))]"
       >
         <div className="border-b border-border px-4 py-3">
           <h2 className="text-base">Notificações</h2>
