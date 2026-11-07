@@ -42,7 +42,7 @@ export function FeedRouteModal({
             <Dialog.Title className="sr-only">{title}</Dialog.Title>
             <Dialog.Close
               aria-label={closeLabel}
-              className="absolute top-3 right-3 z-20 flex size-10 items-center justify-center rounded-full border border-border bg-background/95 text-foreground shadow-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              className="absolute top-3 right-5 z-20 flex size-10 items-center justify-center rounded-full border border-border bg-background/95 text-foreground shadow-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
             >
               <X aria-hidden="true" className="size-5" />
             </Dialog.Close>

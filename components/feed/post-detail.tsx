@@ -44,12 +44,7 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
           hasSingleMediaModal && "md:[contain:size]"
         )}
       >
-        <div
-          className={cn(
-            "space-y-6 p-5 sm:p-6",
-            modal && "md:min-h-0 md:flex-1 md:overflow-y-auto"
-          )}
-        >
+        <div className={cn("space-y-6 p-5 sm:p-6", modal && "md:shrink-0")}>
           <FeedUserSummary
             user={post.author}
             technologies={post.technologies}
@@ -59,10 +54,17 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
 
           <PostActions score={post.score} authorName={post.author.name} />
 
-          <CommentThread comments={post.comments} />
+          {!modal && <CommentThread comments={post.comments} />}
         </div>
 
-        {modal && <PostCommentForm />}
+        {modal && (
+          <>
+            <div className="px-5 pb-6 sm:px-6 md:min-h-0 md:flex-1 md:overflow-y-auto">
+              <CommentThread comments={post.comments} />
+            </div>
+            <PostCommentForm />
+          </>
+        )}
       </div>
     </article>
   )
