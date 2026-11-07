@@ -8,7 +8,7 @@ export function CreatePostModal() {
     <FeedRouteModal
       title="Criar publicação"
       closeLabel="Fechar criação de publicação"
-      popupClassName="overflow-y-auto md:h-auto md:max-h-[86svh] md:w-[min(90vw,46rem)]"
+      popupClassName="overflow-hidden md:h-auto md:max-h-[86svh] md:w-[min(90vw,46rem)]"
     >
       {(close) => <CreatePostForm variant="modal" onExit={close} />}
     </FeedRouteModal>

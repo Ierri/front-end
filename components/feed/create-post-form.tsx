@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
+import { Globe2 } from "lucide-react"
 
 import {
   CreatePostMediaPicker,
@@ -42,7 +43,6 @@ export function CreatePostForm({
   const [content, setContent] = useState("")
   const [media, setMedia] = useState<SelectedPostMedia[]>([])
   const [error, setError] = useState("")
-  const [status, setStatus] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -83,7 +83,18 @@ export function CreatePostForm({
     replaceMedia([...mediaRef.current, ...additions])
   }
 
+  function selectCover(id: string) {
+    if (isSubmitting) return
+    const selected = mediaRef.current.find((item) => item.id === id)
+    if (!selected) return
+    replaceMedia([
+      selected,
+      ...mediaRef.current.filter((item) => item.id !== id),
+    ])
+  }
+
   function removeMedia(id: string) {
+    if (isSubmitting) return
     const item = mediaRef.current.find((entry) => entry.id === id)
     if (item) URL.revokeObjectURL(item.previewUrl)
     replaceMedia(mediaRef.current.filter((entry) => entry.id !== id))
@@ -112,7 +123,6 @@ export function CreatePostForm({
 
     setError("")
     setIsSubmitting(true)
-    setStatus("Publicação criada para demonstração.")
 
     completionTimerRef.current = setTimeout(() => {
       clearMedia()
@@ -128,43 +138,73 @@ export function CreatePostForm({
       aria-busy={isSubmitting}
       onSubmit={handleSubmit}
       className={cn(
-        "min-h-0 bg-background",
-        variant === "page" && "overflow-hidden rounded-2xl border border-border"
+        "flex min-h-0 flex-col bg-background",
+        variant === "modal"
+          ? "h-full md:max-h-[86svh]"
+          : "overflow-hidden rounded-2xl border border-border"
       )}
     >
-      <section className="min-w-0 p-5 sm:p-6">
+      <header className="shrink-0 border-b border-border px-5 py-5 sm:px-6">
+        <h1 className="pr-12 text-lg font-semibold">Criar publicação</h1>
+        <p className="mt-1 pr-12 text-sm text-muted-foreground">
+          Mostre o que você está criando.
+        </p>
+      </header>
+
+      <section className="min-h-0 min-w-0 space-y-6 overflow-y-auto p-5 sm:p-6">
         <div className="flex items-center gap-3">
           <FeedUserAvatar
             src={currentFeedUser.avatar}
             name={currentFeedUser.name}
             size="large"
           />
-          <div>
-            <h1 className="text-lg leading-tight font-semibold">
-              Criar publicação
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Compartilhe sua interface
+          <div className="min-w-0 space-y-1">
+            <p className="truncate text-sm font-semibold">
+              {currentFeedUser.name}
+            </p>
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Globe2 aria-hidden="true" className="size-3.5" />
+              Publicação pública
             </p>
           </div>
         </div>
 
-        <Label htmlFor="post-content" className="sr-only">
-          Texto da publicação
-        </Label>
-        <div className="mt-6 rounded-xl bg-muted p-5 transition-colors focus-within:ring-2 focus-within:ring-ring/50">
-          <Textarea
-            id="post-content"
-            name="content"
-            value={content}
-            disabled={isSubmitting}
-            placeholder="Conte um pouco sobre o projeto... (opcional)"
-            onChange={(event) => setContent(event.target.value)}
-            className={cn(
-              "resize-none rounded-none border-0 bg-transparent p-0 text-base leading-7 shadow-none focus-visible:ring-0 dark:bg-transparent",
-              variant === "modal" ? "min-h-44" : "min-h-64"
-            )}
-          />
+        <div>
+          <div className="mb-3">
+            <Label
+              htmlFor="post-content"
+              className="font-heading text-sm font-semibold"
+            >
+              Sobre o projeto
+            </Label>
+            <p
+              id="post-content-help"
+              className="mt-1 text-xs leading-5 text-muted-foreground"
+            >
+              Uma boa descrição ajuda a comunidade a dar feedback.
+            </p>
+          </div>
+          <div className="rounded-xl border border-input bg-muted/40 p-4 transition-colors focus-within:border-ring focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
+            <Textarea
+              id="post-content"
+              name="content"
+              rows={3}
+              value={content}
+              disabled={isSubmitting}
+              aria-describedby="post-content-help"
+              placeholder="O que você criou? Conte a ideia, os desafios ou em que gostaria de receber feedback."
+              onChange={(event) => setContent(event.target.value)}
+              className="field-sizing-content max-h-60 min-h-24 resize-none overflow-y-auto rounded-none border-0 bg-transparent p-0 text-base leading-7 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            />
+          </div>
+          {content.length > 0 && (
+            <div className="mt-2 text-right text-xs leading-5 text-muted-foreground">
+              <span className="tabular-nums">
+                {content.length}{" "}
+                {content.length === 1 ? "caractere" : "caracteres"}
+              </span>
+            </div>
+          )}
         </div>
 
         <CreatePostMediaPicker
@@ -175,23 +215,22 @@ export function CreatePostForm({
           triggerRef={mediaTriggerRef}
           onFilesSelected={addFiles}
           onRemove={removeMedia}
+          onSelectCover={selectCover}
         />
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4">
-        <p aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {status}
-        </p>
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border bg-background px-5 py-4 sm:px-6">
         <div className="ml-auto flex items-center gap-2">
           <Button
             type="button"
             variant="ghost"
+            className="h-10 px-4"
             disabled={isSubmitting}
             onClick={exitComposer}
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" className="h-10 px-5" disabled={isSubmitting}>
             {isSubmitting ? "Publicando…" : "Publicar"}
           </Button>
         </div>

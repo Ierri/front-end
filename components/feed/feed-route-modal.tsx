@@ -42,9 +42,9 @@ export function FeedRouteModal({
             <Dialog.Title className="sr-only">{title}</Dialog.Title>
             <Dialog.Close
               aria-label={closeLabel}
-              className="absolute top-3 right-5 z-20 flex size-10 items-center justify-center rounded-full border border-border bg-background/95 text-foreground shadow-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              className="absolute top-3 right-4 z-20 flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <X aria-hidden="true" className="size-5" />
+              <X aria-hidden="true" className="size-4" strokeWidth={1.75} />
             </Dialog.Close>
             {typeof children === "function" ? children(close) : children}
           </Dialog.Popup>
