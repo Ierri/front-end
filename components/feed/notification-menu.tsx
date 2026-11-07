@@ -1,0 +1,53 @@
+import { Bell } from "lucide-react"
+
+import { feedNotifications } from "@/lib/feed/mock-data"
+
+export function NotificationMenu() {
+  return (
+    <details name="feed-header-menu" className="group relative">
+      <summary className="relative flex size-10 cursor-pointer list-none items-center justify-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+        <Bell aria-hidden="true" className="size-5" />
+        <span
+          aria-hidden="true"
+          className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background"
+        />
+        <span className="sr-only">Abrir notificações</span>
+      </summary>
+
+      <section
+        aria-label="Notificações fictícias"
+        className="fixed inset-x-4 top-16 z-20 mt-3 w-auto overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg md:absolute md:inset-x-auto md:top-full md:right-0 md:w-[min(22rem,calc(100vw-2rem))]"
+      >
+        <div className="border-b border-border px-4 py-3">
+          <h2 className="text-base">Notificações</h2>
+        </div>
+
+        <ul className="space-y-1 p-1.5">
+          {feedNotifications.map((notification) => (
+            <li
+              key={notification.id}
+              className={`flex gap-3 rounded-lg px-3 py-2.5 ${
+                notification.unread ? "bg-accent/60" : ""
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                  notification.unread ? "bg-primary" : "bg-transparent"
+                }`}
+              />
+              <div className="min-w-0">
+                <p className="text-sm leading-5 font-medium">
+                  {notification.title}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {notification.time}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </details>
+  )
+}
