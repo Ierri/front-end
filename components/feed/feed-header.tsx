@@ -37,7 +37,7 @@ export function FeedHeader() {
             />
           </Link>
 
-          <div className="col-span-2 row-start-3 min-w-0 md:col-span-1 md:col-start-2 md:row-start-1">
+          <div className="col-span-2 row-start-3 min-w-0 md:col-span-1 md:col-start-2 md:row-start-1 md:ml-7">
             <FeedNavigation />
           </div>
 
