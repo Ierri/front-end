@@ -1,13 +1,12 @@
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Bookmark, Search, UserRound } from "lucide-react"
+import { Search } from "lucide-react"
 
 import { FeedNavigation } from "@/components/feed/feed-navigation"
-import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { ProfileMenu } from "@/components/feed/profile-menu"
 import { NotificationMenu } from "@/components/feed/notification-menu"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { currentFeedUser } from "@/lib/feed/mock-data"
 
 export function FeedHeader() {
   return (
@@ -38,7 +37,9 @@ export function FeedHeader() {
           </Link>
 
           <div className="col-span-2 row-start-3 min-w-0 md:col-span-1 md:col-start-2 md:row-start-1 md:ml-7">
-            <FeedNavigation />
+            <Suspense>
+              <FeedNavigation />
+            </Suspense>
           </div>
 
           <form
@@ -64,35 +65,7 @@ export function FeedHeader() {
           <div className="flex items-center gap-3 justify-self-end md:col-start-4 md:row-start-1">
             <NotificationMenu />
 
-            <details name="feed-header-menu" className="group relative">
-              <summary className="flex cursor-pointer list-none items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background [&::-webkit-details-marker]:hidden">
-                <FeedUserAvatar
-                  src={currentFeedUser.avatar}
-                  name={currentFeedUser.name}
-                  priority
-                />
-                <span className="sr-only">Abrir menu do perfil</span>
-              </summary>
-
-              <div className="absolute top-full right-0 mt-3 w-52 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-3 px-3 py-2.5"
-                >
-                  <UserRound aria-hidden="true" className="size-4" />
-                  Meu perfil
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-3 px-3 py-2.5"
-                >
-                  <Bookmark aria-hidden="true" className="size-4" />
-                  Salvos
-                </Button>
-              </div>
-            </details>
+            <ProfileMenu />
           </div>
         </div>
       </div>

@@ -1,33 +1,52 @@
-import Link from "next/link"
+"use client"
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const navigationItems = [
-  { label: "Página Inicial", active: true },
-  { label: "Seguindo", active: false },
-  { label: "Mais votados", active: false },
+  { label: "Página Inicial", value: "home" },
+  { label: "Seguindo", value: "following" },
+  { label: "Mais votados", value: "top" },
 ]
 
 export function FeedNavigation() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const requestedTab = searchParams.get("tab")
+  const activeTab = navigationItems.some((item) => item.value === requestedTab)
+    ? requestedTab
+    : "home"
+
   return (
     <nav aria-label="Navegação do feed" className="overflow-x-auto">
-      <ul className="flex min-w-max items-center gap-6">
-        {navigationItems.map((item) => (
-          <li key={item.label}>
-            {item.active ? (
-              <Link
-                href="/feed"
-                aria-current="page"
-                className="relative flex h-12 items-center justify-center text-sm font-semibold whitespace-nowrap text-foreground outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary focus-visible:ring-2 focus-visible:ring-ring md:h-20"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <div className="flex h-12 items-center justify-center text-sm font-medium whitespace-nowrap text-muted-foreground md:h-20">
-                {item.label}
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+      <Tabs
+        value={pathname === "/feed" ? activeTab : null}
+        onValueChange={(value) => {
+          const params = new URLSearchParams(searchParams)
+          if (value === "home") params.delete("tab")
+          else params.set("tab", String(value))
+          const query = params.toString()
+          router.push(query ? `/feed?${query}` : "/feed")
+        }}
+      >
+        <TabsList
+          variant="line"
+          aria-label="Filtrar publicações"
+          className="min-w-max gap-6 p-0 group-data-horizontal/tabs:h-auto"
+        >
+          {navigationItems.map((item) => (
+            <TabsTrigger
+              key={item.value}
+              value={item.value}
+              className="h-12 flex-none rounded-none px-0 text-sm font-semibold transition-colors after:bg-primary after:transition-none group-data-horizontal/tabs:after:bottom-0 md:h-20"
+            >
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </nav>
   )
 }

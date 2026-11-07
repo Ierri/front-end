@@ -1,7 +1,6 @@
-import { CommentThread } from "@/components/feed/comment-thread"
+import { PostDiscussion } from "@/components/feed/post-discussion"
 import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
-import { PostCommentForm } from "@/components/feed/post-comment-form"
 import { PostMediaGallery } from "@/components/feed/post-media-gallery"
 import type { FeedPostData } from "@/lib/feed/types"
 import { cn } from "@/lib/utils"
@@ -53,18 +52,9 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
           <p className="text-sm leading-6 text-foreground">{post.content}</p>
 
           <PostActions score={post.score} authorName={post.author.name} />
-
-          {!modal && <CommentThread comments={post.comments} />}
         </div>
 
-        {modal && (
-          <>
-            <div className="px-5 pb-6 sm:px-6 md:min-h-0 md:flex-1 md:overflow-y-auto">
-              <CommentThread comments={post.comments} />
-            </div>
-            <PostCommentForm />
-          </>
-        )}
+        <PostDiscussion key={post.id} post={post} modal={modal} />
       </div>
     </article>
   )

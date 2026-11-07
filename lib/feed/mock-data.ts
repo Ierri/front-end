@@ -10,6 +10,12 @@ export const currentFeedUser: FeedUserData = {
   avatar: "/avatars/rafael-lima-demo.png",
 }
 
+// Relações fictícias do perfil demonstrativo enquanto não há integração.
+export const followedDemoAuthors = [
+  "/feed/avatars/bruno-rocha.png",
+  "/feed/avatars/marina-alves.png",
+]
+
 export const feedPosts: FeedPostData[] = [
   {
     id: "analytics-studio",
