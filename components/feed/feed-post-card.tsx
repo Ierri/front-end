@@ -1,63 +1,33 @@
 import Image from "next/image"
-import {
-  ArrowBigDown,
-  ArrowBigUp,
-  Bookmark,
-  type LucideIcon,
-} from "lucide-react"
+import { ArrowBigDown, ArrowBigUp, Bookmark } from "lucide-react"
 
+import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { TechnologyIconList } from "@/components/feed/technology-icon-list"
 import { Button } from "@/components/ui/button"
+import type { FeedPostData } from "@/lib/feed/types"
 
-export type FeedPost = {
-  id: string
-  author: {
-    name: string
-    avatar: string
-  }
-  technologies: Array<{
-    label: string
-    icon: LucideIcon
-  }>
-  media: {
-    src: string
-    alt: string
-  }
-  score: number
-}
-
-export function FeedPostCard({ post }: { post: FeedPost }) {
+export function FeedPostCard({ post }: { post: FeedPostData }) {
   return (
     <article className="rounded-2xl border border-border">
       <header className="flex items-center gap-3 p-4">
-        <Image
+        <FeedUserAvatar
           src={post.author.avatar}
-          alt={`Foto de perfil fictícia de ${post.author.name}`}
-          width={44}
-          height={44}
-          className="size-11 shrink-0 rounded-full object-cover ring-1 ring-border"
+          name={post.author.name}
+          size="large"
         />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{post.author.name}</p>
-          <ul
-            aria-label={`Tecnologias de ${post.author.name}`}
-            className="mt-1.5 flex items-center gap-2.5"
-          >
-            {post.technologies.map((technology) => {
-              const TechnologyIcon = technology.icon
-
-              return (
-                <li key={technology.label}>
-                  <TechnologyIcon
-                    role="img"
-                    aria-label={technology.label}
-                    className="size-4 text-muted-foreground"
-                  />
-                </li>
-              )
-            })}
-          </ul>
+          <TechnologyIconList
+            technologies={post.technologies}
+            ownerName={post.author.name}
+            className="mt-1.5"
+          />
         </div>
       </header>
+
+      <p className="px-4 pb-4 text-sm leading-6 text-foreground">
+        {post.content}
+      </p>
 
       <div className="relative mx-4 aspect-video overflow-hidden rounded-xl bg-muted">
         <Image
