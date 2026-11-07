@@ -1,6 +1,7 @@
 import { CommentThread } from "@/components/feed/comment-thread"
 import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
+import { PostCommentForm } from "@/components/feed/post-comment-form"
 import { PostMediaGallery } from "@/components/feed/post-media-gallery"
 import type { FeedPostData } from "@/lib/feed/types"
 import { cn } from "@/lib/utils"
@@ -38,18 +39,30 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
 
       <div
         className={cn(
-          "min-w-0 space-y-6 p-5 sm:p-6",
-          modal && "md:h-full md:overflow-y-auto",
+          "min-w-0",
+          modal && "md:flex md:h-full md:flex-col md:overflow-hidden",
           hasSingleMediaModal && "md:[contain:size]"
         )}
       >
-        <FeedUserSummary user={post.author} technologies={post.technologies} />
+        <div
+          className={cn(
+            "space-y-6 p-5 sm:p-6",
+            modal && "md:min-h-0 md:flex-1 md:overflow-y-auto"
+          )}
+        >
+          <FeedUserSummary
+            user={post.author}
+            technologies={post.technologies}
+          />
 
-        <p className="text-sm leading-6 text-foreground">{post.content}</p>
+          <p className="text-sm leading-6 text-foreground">{post.content}</p>
 
-        <PostActions score={post.score} authorName={post.author.name} />
+          <PostActions score={post.score} authorName={post.author.name} />
 
-        <CommentThread comments={post.comments} />
+          <CommentThread comments={post.comments} />
+        </div>
+
+        {modal && <PostCommentForm />}
       </div>
     </article>
   )
