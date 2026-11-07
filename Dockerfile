@@ -17,6 +17,7 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ARG SITE_URL
 ENV SITE_URL=${SITE_URL}
+RUN test -n "$NEXT_PUBLIC_API_URL" || (echo "Defina NEXT_PUBLIC_API_URL como build argument com a URL pública do NestJS." >&2; exit 1)
 RUN bun run build
 
 FROM base AS runner

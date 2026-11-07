@@ -27,10 +27,19 @@ export async function apiRequest<T>(
     body?: unknown
   } = {}
 ): Promise<{ message: string; data: T }> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL?.trim() ||
+    (process.env.NODE_ENV === "development" ? "http://localhost:3001" : "")
+  if (!baseUrl) {
+    throw new ApiError(
+      "O endereço da API não foi configurado no build da aplicação.",
+      "API_NOT_CONFIGURED"
+    )
+  }
   let response: Response
   try {
     response = await fetch(
-      `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/$/, "")}${path}`,
+      `${baseUrl.replace(/\/$/, "")}${path}`,
       {
         method: options.method ?? "GET",
         headers: { "Content-Type": "application/json" },
