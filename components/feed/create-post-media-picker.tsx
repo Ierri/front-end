@@ -10,11 +10,13 @@ import {
 import { Camera, ImageIcon, Trash2, Video } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import type { PostMediaKind } from "@/lib/feed/media"
 import { cn } from "@/lib/utils"
 
 export type SelectedPostMedia = {
   id: string
   file: File
+  kind: PostMediaKind
   previewUrl: string
 }
 
@@ -70,7 +72,7 @@ export function CreatePostMediaPicker({
         id="post-media"
         name="media"
         type="file"
-        accept="image/*,video/*"
+        accept="image/*,video/*,.heic,.heif,.mov,.m4v"
         multiple
         disabled={disabled}
         tabIndex={-1}
@@ -120,7 +122,7 @@ export function CreatePostMediaPicker({
                   variant === "modal" ? "size-28" : "size-32"
                 )}
               >
-                {item.file.type.startsWith("image/") ? (
+                {item.kind === "image" ? (
                   // A URL local existe somente durante a pré-visualização.
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -138,7 +140,7 @@ export function CreatePostMediaPicker({
                   />
                 )}
                 <span className="absolute bottom-2 left-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm">
-                  {item.file.type.startsWith("image/") ? (
+                  {item.kind === "image" ? (
                     <ImageIcon aria-hidden="true" className="size-3.5" />
                   ) : (
                     <Video aria-hidden="true" className="size-3.5" />

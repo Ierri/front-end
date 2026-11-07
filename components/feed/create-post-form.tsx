@@ -11,6 +11,7 @@ import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { getPostMediaKind, type PostMediaKind } from "@/lib/feed/media"
 import { currentFeedUser } from "@/lib/feed/mock-data"
 import { cn } from "@/lib/utils"
 
@@ -19,8 +20,11 @@ type CreatePostFormProps = {
   onExit?: () => void
 }
 
-function isSupportedMedia(file: File) {
-  return file.type.startsWith("image/") || file.type.startsWith("video/")
+let mediaIdSequence = 0
+
+function createMediaId() {
+  mediaIdSequence += 1
+  return `post-media-${Date.now()}-${mediaIdSequence}`
 }
 
 function releasePreviewUrls(media: SelectedPostMedia[]) {
@@ -57,7 +61,11 @@ export function CreatePostForm({
   function addFiles(files: File[]) {
     if (isSubmitting) return
 
-    const supportedFiles = files.filter(isSupportedMedia)
+    const supportedFiles: Array<{ file: File; kind: PostMediaKind }> = []
+    for (const file of files) {
+      const kind = getPostMediaKind(file)
+      if (kind) supportedFiles.push({ file, kind })
+    }
     setError(
       supportedFiles.length === files.length
         ? ""
@@ -66,9 +74,10 @@ export function CreatePostForm({
 
     if (!supportedFiles.length) return
 
-    const additions = supportedFiles.map((file) => ({
-      id: crypto.randomUUID(),
+    const additions = supportedFiles.map(({ file, kind }) => ({
+      id: createMediaId(),
       file,
+      kind,
       previewUrl: URL.createObjectURL(file),
     }))
     replaceMedia([...mediaRef.current, ...additions])
