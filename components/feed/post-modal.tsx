@@ -21,13 +21,13 @@ export function PostModal({ post }: { post: FeedPostData }) {
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[90] bg-overlay backdrop-blur-[2px]" />
-        <Dialog.Viewport className="fixed inset-0 z-[100] flex items-center justify-center p-0 lg:p-6">
+        <Dialog.Viewport className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 lg:p-6">
           <Dialog.Popup
             className={cn(
-              "relative h-svh w-screen overflow-hidden bg-background shadow-2xl outline-none lg:w-[min(96vw,92rem)] lg:rounded-2xl",
+              "relative h-svh w-screen overflow-hidden bg-background shadow-2xl outline-none md:w-[min(96vw,92rem)] md:rounded-2xl",
               hasSingleMedia
-                ? "lg:h-auto lg:max-h-[min(92svh,58rem)]"
-                : "lg:h-[min(92svh,58rem)]"
+                ? "md:h-auto md:max-h-[min(92svh,58rem)]"
+                : "md:h-[min(92svh,58rem)]"
             )}
           >
             <Dialog.Title className="sr-only">

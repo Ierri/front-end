@@ -16,11 +16,11 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
   return (
     <article
       className={cn(
-        "min-h-0 bg-background lg:grid lg:grid-cols-[minmax(0,1.65fr)_minmax(22rem,0.85fr)]",
+        "min-h-0 bg-background md:grid md:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)] lg:grid-cols-[minmax(0,1.65fr)_minmax(22rem,0.85fr)]",
         hasSingleMediaModal
-          ? "h-full overflow-y-auto lg:h-auto lg:max-h-[min(92svh,58rem)] lg:overflow-hidden"
+          ? "h-full overflow-y-auto md:h-auto md:max-h-[min(92svh,58rem)] md:overflow-hidden"
           : modal
-            ? "h-full overflow-y-auto lg:overflow-hidden"
+            ? "h-full overflow-y-auto md:overflow-hidden"
             : "overflow-hidden rounded-2xl border border-border"
       )}
     >
@@ -31,16 +31,16 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
         priority
         className={cn(
           hasSingleMediaModal
-            ? "lg:max-h-[min(92svh,58rem)] lg:overflow-y-auto"
-            : modal && "lg:h-full lg:overflow-y-auto"
+            ? "md:max-h-[min(92svh,58rem)] md:overflow-y-auto"
+            : modal && "md:h-full md:overflow-y-auto"
         )}
       />
 
       <div
         className={cn(
           "min-w-0 space-y-6 p-5 sm:p-6",
-          modal && "lg:h-full lg:overflow-y-auto",
-          hasSingleMediaModal && "lg:[contain:size]"
+          modal && "md:h-full md:overflow-y-auto",
+          hasSingleMediaModal && "md:[contain:size]"
         )}
       >
         <FeedUserSummary user={post.author} technologies={post.technologies} />
