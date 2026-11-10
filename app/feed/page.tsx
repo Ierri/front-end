@@ -27,7 +27,7 @@ export default async function FeedPage({
         className="min-h-[calc(100svh-11.25rem)] px-4 pt-6 pb-10 sm:px-6 md:min-h-[calc(100svh-5rem)] lg:px-8 xl:px-0"
       >
         <div className="mx-auto max-w-3xl space-y-6">
-          <div className="flex h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
+          <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
             {tab === "following" ? (
               <FollowingPostsStrip posts={posts} />
             ) : tab === "top" ? (

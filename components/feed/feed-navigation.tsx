@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const navigationItems = [
@@ -14,8 +15,12 @@ export function FeedNavigation() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { status } = useAuth()
+  const visibleItems = navigationItems.filter(
+    (item) => item.value !== "following" || status === "authenticated"
+  )
   const requestedTab = searchParams.get("tab")
-  const activeTab = navigationItems.some((item) => item.value === requestedTab)
+  const activeTab = visibleItems.some((item) => item.value === requestedTab)
     ? requestedTab
     : "home"
 
@@ -36,7 +41,7 @@ export function FeedNavigation() {
           aria-label="Filtrar publicações"
           className="min-w-max gap-6 p-0 group-data-horizontal/tabs:h-auto"
         >
-          {navigationItems.map((item) => (
+          {visibleItems.map((item) => (
             <TabsTrigger
               key={item.value}
               value={item.value}

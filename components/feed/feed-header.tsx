@@ -4,8 +4,7 @@ import Link from "next/link"
 import { Search } from "lucide-react"
 
 import { FeedNavigation } from "@/components/feed/feed-navigation"
-import { ProfileMenu } from "@/components/feed/profile-menu"
-import { NotificationMenu } from "@/components/feed/notification-menu"
+import { FeedAccountActions } from "@/components/feed/feed-account-actions"
 import { Input } from "@/components/ui/input"
 
 export function FeedHeader() {
@@ -63,9 +62,13 @@ export function FeedHeader() {
           </form>
 
           <div className="flex items-center gap-3 justify-self-end md:col-start-4 md:row-start-1">
-            <NotificationMenu />
-
-            <ProfileMenu />
+            <Suspense
+              fallback={
+                <span className="size-10 rounded-full bg-muted" aria-hidden />
+              }
+            >
+              <FeedAccountActions />
+            </Suspense>
           </div>
         </div>
       </div>
