@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type FormEvent } from "react"
+import { useState, useSyncExternalStore, type FormEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Check, LoaderCircle, Save } from "lucide-react"
@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  defaultDemoProfile,
   readDemoProfile,
   writeDemoProfile,
   type DemoProfile,
@@ -30,15 +29,20 @@ const technologyOptions: { value: TechnologyKey; label: string }[] = [
   { value: "cloud", label: "Cloud" },
 ]
 
+const subscribeToHydration = () => () => {}
+const getClientHydrationSnapshot = () => true
+const getServerHydrationSnapshot = () => false
+
 export default function EditProfilePage() {
   const router = useRouter()
-  const [profile, setProfile] = useState<DemoProfile>(defaultDemoProfile)
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  )
+  const [profile, setProfile] = useState<DemoProfile>(readDemoProfile)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
-
-  useEffect(() => {
-    setProfile(readDemoProfile())
-  }, [])
 
   function update<K extends keyof DemoProfile>(key: K, value: DemoProfile[K]) {
     setProfile((current) => ({ ...current, [key]: value }))
@@ -84,6 +88,20 @@ export default function EditProfilePage() {
       setError("Não foi possível salvar neste navegador. Tente novamente.")
       setSaving(false)
     }
+  }
+
+  if (!hydrated) {
+    return (
+      <div className="min-h-svh bg-background">
+        <FeedHeader />
+        <main className="mx-auto flex min-h-72 w-full max-w-4xl items-center justify-center px-4 sm:px-6 lg:px-8">
+          <LoaderCircle
+            aria-label="Carregando perfil"
+            className="size-6 animate-spin text-muted-foreground"
+          />
+        </main>
+      </div>
+    )
   }
 
   return (
