@@ -3,10 +3,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
 type FeedUserAvatarProps = {
-  src: string
+  src?: string
   name: string
   size?: "small" | "default" | "large" | "story"
   priority?: boolean
+  fictitious?: boolean
 }
 
 const avatarSizes = {
@@ -21,6 +22,7 @@ export function FeedUserAvatar({
   name,
   size = "default",
   priority = false,
+  fictitious = true,
 }: FeedUserAvatarProps) {
   const avatarSize = avatarSizes[size]
 
@@ -28,7 +30,11 @@ export function FeedUserAvatar({
     <Avatar className={cn(avatarSize.className, "shrink-0 ring-1 ring-border")}>
       <AvatarImage
         src={src}
-        alt={`Foto de perfil fictícia de ${name}`}
+        alt={
+          fictitious
+            ? `Foto de perfil fictícia de ${name}`
+            : `Foto de perfil de ${name}`
+        }
         loading={priority ? "eager" : "lazy"}
       />
       <AvatarFallback>

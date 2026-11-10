@@ -8,6 +8,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import type { FeedCommentData } from "@/lib/feed/types"
 import { cn } from "@/lib/utils"
@@ -37,6 +38,7 @@ function CommentItem({
   depth?: number
 }) {
   const [expanded, setExpanded] = useState(true)
+  const { requireAuth } = useAuth()
   const isAuthor = comment.author.avatar === postAuthor
 
   return (
@@ -52,6 +54,7 @@ function CommentItem({
           src={comment.author.avatar}
           name={comment.author.name}
           size="small"
+          fictitious={comment.author.fictitious !== false}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -75,6 +78,7 @@ function CommentItem({
               type="button"
               aria-pressed={activeReplyId === comment.id}
               onClick={() => {
+                if (!requireAuth()) return
                 setExpanded(true)
                 onReply(comment)
               }}
