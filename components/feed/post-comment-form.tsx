@@ -3,12 +3,12 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react"
 import { ArrowUp, X } from "lucide-react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import type { ReplyTarget } from "@/components/feed/post-discussion"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { currentFeedUser } from "@/lib/feed/mock-data"
 
 type PostCommentFormProps = {
   replyTarget: ReplyTarget | null
@@ -24,6 +24,11 @@ export function PostCommentForm({
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const inputId = useId()
   const [comment, setComment] = useState("")
+  const { status, user, requireAuth } = useAuth()
+  const isAuthenticated = status === "authenticated"
+  const commentPlaceholder = replyTarget
+    ? "Continue essa conversa…"
+    : "Adicione um comentário…"
 
   useEffect(() => {
     if (replyTarget) inputRef.current?.focus()
@@ -31,6 +36,7 @@ export function PostCommentForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!requireAuth()) return
     if (!comment.trim()) {
       inputRef.current?.focus()
       return
@@ -69,47 +75,64 @@ export function PostCommentForm({
               </Button>
             </div>
           )}
-          <Label htmlFor={inputId} className="sr-only">
-            {replyTarget ? "Sua resposta" : "Seu comentário"}
-          </Label>
+          {isAuthenticated && (
+            <Label htmlFor={inputId} className="sr-only">
+              {replyTarget ? "Sua resposta" : "Seu comentário"}
+            </Label>
+          )}
           <div className="flex items-end gap-2 rounded-2xl border border-input bg-muted/20 p-2 transition-colors focus-within:border-ring/60 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/10">
             <div className="shrink-0 self-start">
               <FeedUserAvatar
-                src={currentFeedUser.avatar}
-                name={currentFeedUser.name}
+                src={user?.avatarUrl}
+                name={user?.name ?? "Visitante"}
                 size="small"
+                fictitious={false}
               />
             </div>
-            <Textarea
-              ref={inputRef}
-              id={inputId}
-              name="comment"
-              rows={1}
-              value={comment}
-              required
-              placeholder={
-                replyTarget
-                  ? "Continue essa conversa…"
-                  : "Adicione um comentário…"
-              }
-              onChange={(event) => setComment(event.target.value)}
-              onKeyDown={(event) => {
-                if (
-                  event.key === "Enter" &&
-                  (event.ctrlKey || event.metaKey) &&
-                  !event.nativeEvent.isComposing
-                ) {
-                  event.preventDefault()
-                  event.currentTarget.form?.requestSubmit()
-                }
-              }}
-              className="field-sizing-content max-h-32 min-h-8 flex-1 resize-none rounded-none border-0 bg-transparent px-1.5 py-1 text-sm leading-6 shadow-none focus-visible:ring-0 dark:bg-transparent"
-            />
+            {isAuthenticated ? (
+              <Textarea
+                ref={inputRef}
+                id={inputId}
+                name="comment"
+                rows={1}
+                value={comment}
+                required
+                placeholder={commentPlaceholder}
+                onChange={(event) => setComment(event.target.value)}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "Enter" &&
+                    (event.ctrlKey || event.metaKey) &&
+                    !event.nativeEvent.isComposing
+                  ) {
+                    event.preventDefault()
+                    event.currentTarget.form?.requestSubmit()
+                  }
+                }}
+                className="field-sizing-content max-h-32 min-h-8 flex-1 resize-none rounded-none border-0 bg-transparent px-1.5 py-1 text-sm leading-6 shadow-none focus-visible:ring-0 dark:bg-transparent"
+              />
+            ) : (
+              <button
+                type="button"
+                aria-label="Entrar para adicionar comentário"
+                onClick={() => requireAuth()}
+                className="min-h-8 flex-1 cursor-text px-1.5 py-1 text-left text-sm leading-6 text-muted-foreground outline-none"
+              >
+                {commentPlaceholder}
+              </button>
+            )}
             <Button
-              type="submit"
+              type={isAuthenticated ? "submit" : "button"}
               size="icon"
-              disabled={!comment.trim()}
-              aria-label={replyTarget ? "Enviar resposta" : "Enviar comentário"}
+              disabled={isAuthenticated && !comment.trim()}
+              onClick={isAuthenticated ? undefined : () => requireAuth()}
+              aria-label={
+                isAuthenticated
+                  ? replyTarget
+                    ? "Enviar resposta"
+                    : "Enviar comentário"
+                  : "Entrar para adicionar comentário"
+              }
               className="size-8 shrink-0 rounded-full"
             >
               <ArrowUp aria-hidden="true" className="size-4" />
