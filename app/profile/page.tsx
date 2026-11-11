@@ -1,18 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import {
   BriefcaseBusiness,
   Camera,
   CirclePlus,
   Code2,
-  Heart,
   Globe2,
   LoaderCircle,
   MapPin,
-  MessageCircle,
   PencilLine,
   Plus,
   UserRound,
@@ -35,23 +32,9 @@ import {
   readDemoProfile,
   type DemoProfile,
 } from "@/lib/profile/demo-profile"
+import { profilePosts } from "@/lib/feed/mock-data"
+import { ProfileProjectGrid } from "@/components/profile/profile-project-grid"
 import { ProfileStackGrid } from "@/components/profile/profile-stack-grid"
-import { feedPosts } from "@/lib/feed/mock-data"
-
-const projectTitles: Record<string, string> = {
-  "analytics-studio": "Analytics Studio",
-  "wellness-mobile": "Wellness Mobile",
-  "commerce-system": "Commerce System",
-}
-
-const demoProjects = feedPosts.slice(0, 3).map((post) => ({
-  title: projectTitles[post.id] ?? post.id,
-  image: post.media[0]?.src ?? "",
-  alt: `Projeto ${projectTitles[post.id] ?? post.id}`,
-  score: post.score,
-  comments: post.comments.length,
-  content: post.content,
-}))
 
 const demoStats = [
   { label: "Projetos", value: "3" },
@@ -287,69 +270,7 @@ export default function ProfilePage() {
             </div>
 
             <TabsContent value="projects" className="mt-0">
-              {!user ? (
-                <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                  {demoProjects.map((project) => (
-                    <article key={project.title} className="group min-w-0">
-                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
-                        <Image
-                          src={project.image}
-                          alt={project.alt}
-                          fill
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                        />
-                      </div>
-                      <div className="flex items-start justify-between gap-3 pt-3">
-                        <div className="min-w-0">
-                          <h2 className="truncate font-semibold">{project.title}</h2>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Projeto de interface
-                          </p>
-                        </div>
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                        {project.content}
-                      </p>
-                      <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Heart aria-hidden="true" className="size-3.5" />
-                          {project.score}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <MessageCircle aria-hidden="true" className="size-3.5" />
-                          {project.comments}
-                        </span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-              <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/40 px-5 py-12 text-center">
-                <div className="mb-5 flex size-14 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm">
-                  <BriefcaseBusiness aria-hidden="true" className="size-6" />
-                </div>
-                <h2 className="text-xl font-semibold">
-                  {user ? "Seu portfólio começa aqui" : "Projetos do criador"}
-                </h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                  {user
-                    ? "Você ainda não tem projetos publicados. Quando o catálogo de projetos estiver conectado, suas criações aparecerão aqui."
-                    : "Os projetos deste perfil aparecerão aqui quando estiverem disponíveis."}
-                </p>
-                {user ? (
-                  <Button
-                    type="button"
-                    disabled
-                    className="mt-5 gap-2"
-                    title="A publicação de projetos ainda não está disponível na API."
-                  >
-                    <Plus aria-hidden="true" />
-                    Publicar primeiro projeto
-                  </Button>
-                ) : null}
-              </div>
-              )}
+              <ProfileProjectGrid posts={user ? [] : profilePosts} />
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
