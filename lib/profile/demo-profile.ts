@@ -1,5 +1,13 @@
 import type { TechnologyKey } from "@/lib/feed/types"
 import { currentFeedUser } from "@/lib/feed/mock-data"
+import type { StackIconKey } from "@/lib/profile/stack-icons"
+
+export type CustomProfileStack = {
+  id: string
+  name: string
+  description: string
+  icon: StackIconKey
+}
 
 export type DemoProfile = {
   name: string
@@ -15,6 +23,8 @@ export type DemoProfile = {
   instagram: string
   socialLinksConfigured: boolean
   technologies: TechnologyKey[]
+  customStacks: CustomProfileStack[]
+  stackDisplay: "minimal" | "detailed"
 }
 
 export const defaultDemoProfile: DemoProfile = {
@@ -31,6 +41,8 @@ export const defaultDemoProfile: DemoProfile = {
   instagram: "https://www.instagram.com/",
   socialLinksConfigured: true,
   technologies: ["interface-design", "react", "typescript"],
+  customStacks: [],
+  stackDisplay: "detailed",
 }
 
 const storageKey = "ierri-demo-profile"
@@ -73,6 +85,11 @@ export function readDemoProfile(): DemoProfile {
       technologies: Array.isArray(value.technologies)
         ? value.technologies
         : defaultDemoProfile.technologies,
+      customStacks: Array.isArray(value.customStacks)
+        ? value.customStacks
+        : defaultDemoProfile.customStacks,
+      stackDisplay:
+        value.stackDisplay === "minimal" ? "minimal" : "detailed",
     }
   } catch {
     return defaultDemoProfile

@@ -3,7 +3,15 @@
 import { useState, useSyncExternalStore, type FormEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Check, LoaderCircle, Save } from "lucide-react"
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  LoaderCircle,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { FeedHeader } from "@/components/feed/feed-header"
@@ -11,22 +19,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { technologyCatalog } from "@/components/feed/technology-icon-list"
+import { stackIconCatalog, stackIconOptions, type StackIconKey } from "@/lib/profile/stack-icons"
 import {
   readDemoProfile,
   writeDemoProfile,
+  type CustomProfileStack,
   type DemoProfile,
 } from "@/lib/profile/demo-profile"
 import type { TechnologyKey } from "@/lib/feed/types"
 
-const technologyOptions: { value: TechnologyKey; label: string }[] = [
-  { value: "interface-design", label: "Design de interfaces" },
-  { value: "design", label: "Design" },
-  { value: "web", label: "Desenvolvimento web" },
-  { value: "mobile", label: "Mobile" },
-  { value: "react", label: "React" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "database", label: "Banco de dados" },
-  { value: "cloud", label: "Cloud" },
+const technologyOptions: TechnologyKey[] = [
+  "interface-design",
+  "design",
+  "web",
+  "mobile",
+  "react",
+  "typescript",
+  "database",
+  "cloud",
 ]
 
 const subscribeToHydration = () => () => {}
@@ -43,6 +54,10 @@ export default function EditProfilePage() {
   const [profile, setProfile] = useState<DemoProfile>(readDemoProfile)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [stackError, setStackError] = useState("")
+  const [newStackName, setNewStackName] = useState("")
+  const [newStackDescription, setNewStackDescription] = useState("")
+  const [newStackIcon, setNewStackIcon] = useState<StackIconKey>("code")
 
   function update<K extends keyof DemoProfile>(key: K, value: DemoProfile[K]) {
     setProfile((current) => ({ ...current, [key]: value }))
@@ -54,6 +69,44 @@ export default function EditProfilePage() {
       technologies: current.technologies.includes(technology)
         ? current.technologies.filter((item) => item !== technology)
         : [...current.technologies, technology],
+    }))
+  }
+
+  function addCustomStack() {
+    const name = newStackName.trim()
+    if (!name) {
+      setStackError("Digite o nome da stack que deseja adicionar.")
+      return
+    }
+    if (
+      profile.customStacks.some(
+        (stack) => stack.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+      )
+    ) {
+      setStackError("Essa stack já foi adicionada.")
+      return
+    }
+
+    const stack: CustomProfileStack = {
+      id: `custom-${Date.now()}`,
+      name,
+      description: newStackDescription.trim(),
+      icon: newStackIcon,
+    }
+    setProfile((current) => ({
+      ...current,
+      customStacks: [...current.customStacks, stack],
+    }))
+    setNewStackName("")
+    setNewStackDescription("")
+    setNewStackIcon("code")
+    setStackError("")
+  }
+
+  function removeCustomStack(id: string) {
+    setProfile((current) => ({
+      ...current,
+      customStacks: current.customStacks.filter((stack) => stack.id !== id),
     }))
   }
 
@@ -273,25 +326,213 @@ export default function EditProfilePage() {
           </section>
 
           <section className="rounded-2xl border border-border p-5 sm:p-7">
-            <h2 className="text-lg font-semibold">Stacks e tecnologias</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Selecione as áreas que quer destacar no perfil.
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {technologyOptions.map((technology) => (
-                <label
-                  key={technology.value}
-                  className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3 text-sm transition-colors hover:bg-muted"
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold">Stacks e tecnologias</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Escolha as áreas que quer destacar no perfil.
+                </p>
+              </div>
+              <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
+                {profile.technologies.length + profile.customStacks.length} item
+                {profile.technologies.length + profile.customStacks.length === 1
+                  ? ""
+                  : "s"} selecionado
+                {profile.technologies.length + profile.customStacks.length === 1
+                  ? ""
+                  : "s"}
+              </span>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold">Exibição no perfil</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Escolha como suas stacks aparecem para quem visita seu perfil.
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  aria-pressed={profile.stackDisplay === "minimal"}
+                  onClick={() => update("stackDisplay", "minimal")}
+                  className={`rounded-xl border p-4 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${profile.stackDisplay === "minimal" ? "border-primary/50 bg-accent/50" : "border-border hover:bg-secondary/70"}`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={profile.technologies.includes(technology.value)}
-                    onChange={() => toggleTechnology(technology.value)}
-                    className="size-4 accent-primary"
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold">Minimalista</span>
+                    {profile.stackDisplay === "minimal" ? (
+                      <CheckCircle2 aria-hidden="true" className="size-4 text-accent-foreground" />
+                    ) : null}
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                    Mostra apenas os ícones, como na versão compacta anterior.
+                  </span>
+                  <span aria-hidden="true" className="mt-3 flex items-center gap-3 text-muted-foreground">
+                    {profile.technologies.slice(0, 4).map((technology) => {
+                      const Icon = technologyCatalog[technology].icon
+                      return <Icon key={technology} className="size-4" />
+                    })}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={profile.stackDisplay === "detailed"}
+                  onClick={() => update("stackDisplay", "detailed")}
+                  className={`rounded-xl border p-4 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${profile.stackDisplay === "detailed" ? "border-primary/50 bg-accent/50" : "border-border hover:bg-secondary/70"}`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold">Em destaque</span>
+                    {profile.stackDisplay === "detailed" ? (
+                      <CheckCircle2 aria-hidden="true" className="size-4 text-accent-foreground" />
+                    ) : null}
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                    Mostra cartões com nome e descrição de cada stack.
+                  </span>
+                  <span aria-hidden="true" className="mt-3 inline-flex rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium">
+                    {profile.technologies[0]
+                      ? technologyCatalog[profile.technologies[0]].label
+                      : "Sua stack"}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <ul
+              aria-label="Selecione stacks e tecnologias"
+              className="mt-6 grid gap-3 sm:grid-cols-2"
+            >
+              {technologyOptions.map((technology) => {
+                const selected = profile.technologies.includes(technology)
+                const {
+                  icon: Icon,
+                  label,
+                  description,
+                } = technologyCatalog[technology]
+
+                return (
+                  <li key={technology}>
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => toggleTechnology(technology)}
+                      className={`flex min-h-20 w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${selected ? "border-primary/50 bg-accent/60" : "border-border bg-card hover:bg-secondary/70"}`}
+                    >
+                      <span
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                      >
+                        <Icon aria-hidden="true" className="size-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold">{label}</span>
+                        <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                          {description}
+                        </span>
+                      </span>
+                      <CheckCircle2
+                        aria-hidden="true"
+                        className={`size-5 shrink-0 ${selected ? "text-accent-foreground" : "text-border"}`}
+                      />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <div className="mt-8 border-t border-border pt-6">
+              <h3 className="text-sm font-semibold">Adicionar uma stack própria</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Crie um item personalizado e escolha um ícone para representá-lo.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="custom-stack-name">Nome da stack</Label>
+                  <Input
+                    id="custom-stack-name"
+                    value={newStackName}
+                    onChange={(event) => setNewStackName(event.target.value)}
+                    maxLength={40}
+                    placeholder="Ex.: Figma, Vue, Acessibilidade"
                   />
-                  {technology.label}
-                </label>
-              ))}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="custom-stack-description">Descrição (opcional)</Label>
+                  <Input
+                    id="custom-stack-description"
+                    value={newStackDescription}
+                    onChange={(event) => setNewStackDescription(event.target.value)}
+                    maxLength={70}
+                    placeholder="Uma breve descrição"
+                  />
+                </div>
+              </div>
+
+              <fieldset className="mt-4">
+                <legend className="text-sm font-medium">Ícone</legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {stackIconOptions.map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-label={label}
+                      aria-pressed={newStackIcon === key}
+                      title={label}
+                      onClick={() => setNewStackIcon(key)}
+                      className={`flex size-10 items-center justify-center rounded-lg border transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${newStackIcon === key ? "border-primary bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted"}`}
+                    >
+                      <Icon aria-hidden="true" className="size-4" />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              {stackError ? (
+                <p role="alert" className="mt-3 text-sm text-destructive">
+                  {stackError}
+                </p>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addCustomStack}
+                className="mt-4 gap-2"
+              >
+                <Plus aria-hidden="true" className="size-4" />
+                Adicionar stack
+              </Button>
+
+              {profile.customStacks.length ? (
+                <ul aria-label="Stacks próprias adicionadas" className="mt-5 space-y-2">
+                  {profile.customStacks.map((stack) => {
+                    const Icon = stackIconCatalog[stack.icon]
+                    return (
+                      <li
+                        key={stack.id}
+                        className="flex items-center gap-3 rounded-xl border border-border px-3.5 py-3"
+                      >
+                        <span className="flex size-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                          <Icon aria-hidden="true" className="size-4" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">{stack.name}</span>
+                          {stack.description ? (
+                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                              {stack.description}
+                            </span>
+                          ) : null}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Remover ${stack.name}`}
+                          onClick={() => removeCustomStack(stack.id)}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </Button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              ) : null}
             </div>
           </section>
 

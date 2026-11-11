@@ -35,7 +35,7 @@ import {
   readDemoProfile,
   type DemoProfile,
 } from "@/lib/profile/demo-profile"
-import { TechnologyIconList } from "@/components/feed/technology-icon-list"
+import { ProfileStackGrid } from "@/components/profile/profile-stack-grid"
 import { feedPosts } from "@/lib/feed/mock-data"
 
 const projectTitles: Record<string, string> = {
@@ -218,13 +218,21 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                {!user && demoProfile.technologies.length ? (
-                  <TechnologyIconList
-                    technologies={demoProfile.technologies}
-                    ownerName={demoProfile.name}
-                    className="mt-4"
-                  />
-                ) : null}
+                <section className="mt-6" aria-label="Stacks em destaque">
+                  <h2 className="mb-3 text-sm font-semibold">Stacks em destaque</h2>
+                  {!user ? (
+                    <ProfileStackGrid
+                      technologies={demoProfile.technologies}
+                      customStacks={demoProfile.customStacks}
+                      ownerName={demoProfile.name}
+                      display={demoProfile.stackDisplay}
+                    />
+                  ) : (
+                    <p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">
+                      As tecnologias deste perfil ainda não estão disponíveis.
+                    </p>
+                  )}
+                </section>
 
                 <dl className="mt-7 flex flex-wrap gap-x-9 gap-y-4 border-t border-border pt-5">
                   {(user ? unavailableStats : demoStats).map((stat) => (
@@ -395,6 +403,14 @@ export default function ProfilePage() {
                             className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
                           >
                             {technologyLabels[technology]}
+                          </li>
+                        ))}
+                        {demoProfile.customStacks.map((stack) => (
+                          <li
+                            key={stack.id}
+                            className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+                          >
+                            {stack.name}
                           </li>
                         ))}
                       </ul>

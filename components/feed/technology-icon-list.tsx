@@ -13,21 +13,50 @@ import {
 import type { TechnologyKey } from "@/lib/feed/types"
 import { cn } from "@/lib/utils"
 
-const technologyDetails: Record<
+export const technologyCatalog: Record<
   TechnologyKey,
-  { label: string; icon: LucideIcon }
+  { label: string; description: string; icon: LucideIcon }
 > = {
-  web: { label: "Desenvolvimento web", icon: Code2 },
-  typescript: { label: "TypeScript", icon: Braces },
-  database: { label: "Bancos de dados", icon: Database },
-  mobile: { label: "Aplicativos mobile", icon: Smartphone },
-  react: { label: "React", icon: Component },
-  design: { label: "Design de interfaces", icon: Palette },
+  web: {
+    label: "Desenvolvimento web",
+    description: "Sites e aplicações para a web",
+    icon: Code2,
+  },
+  typescript: {
+    label: "TypeScript",
+    description: "Tipagem e ferramentas de desenvolvimento",
+    icon: Braces,
+  },
+  database: {
+    label: "Bancos de dados",
+    description: "Modelagem, consultas e armazenamento",
+    icon: Database,
+  },
+  mobile: {
+    label: "Aplicativos mobile",
+    description: "Experiências para celulares e tablets",
+    icon: Smartphone,
+  },
+  react: {
+    label: "React",
+    description: "Interfaces com componentes reutilizáveis",
+    icon: Component,
+  },
+  design: {
+    label: "Design de interfaces",
+    description: "Experiência, interação e sistemas visuais",
+    icon: Palette,
+  },
   "interface-design": {
     label: "Design de interfaces",
+    description: "Pesquisa e desenho de produtos digitais",
     icon: PanelsTopLeft,
   },
-  cloud: { label: "Cloud", icon: Cloud },
+  cloud: {
+    label: "Cloud",
+    description: "Infraestrutura e serviços em nuvem",
+    icon: Cloud,
+  },
 }
 
 type TechnologyIconListProps = {
@@ -47,7 +76,7 @@ export function TechnologyIconList({
       className={cn("flex items-center gap-2.5", className)}
     >
       {technologies.map((technology) => {
-        const { icon: TechnologyIcon, label } = technologyDetails[technology]
+        const { icon: TechnologyIcon, label } = technologyCatalog[technology]
 
         return (
           <li key={technology}>
