@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+const defaultApiUrl = "https://hml-api-ierri.eulucas.com.br"
+
 const failureSchema = z.object({
   success: z.literal(false),
   error: z.object({
@@ -25,31 +27,34 @@ export async function apiRequest<T>(
   options: {
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
     body?: unknown
+    signal?: AbortSignal
+    timeoutMs?: number
   } = {}
 ): Promise<{ message: string; data: T }> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL?.trim() ||
-    (process.env.NODE_ENV === "development" ? "http://localhost:3001" : "")
-  if (!baseUrl) {
-    throw new ApiError(
-      "O endereço da API não foi configurado no build da aplicação.",
-      "API_NOT_CONFIGURED"
-    )
-  }
+    process.env.NEXT_PUBLIC_API_URL?.trim() || defaultApiUrl
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData
+  const timeoutSignal = AbortSignal.timeout(options.timeoutMs ?? 10000)
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, timeoutSignal])
+    : timeoutSignal
+  const requestBody: BodyInit | undefined =
+    options.body === undefined
+      ? undefined
+      : isFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body)
   let response: Response
   try {
-    response = await fetch(
-      `${baseUrl.replace(/\/$/, "")}${path}`,
-      {
-        method: options.method ?? "GET",
-        headers: { "Content-Type": "application/json" },
-        body:
-          options.body === undefined ? undefined : JSON.stringify(options.body),
-        cache: "no-store",
-        credentials: "include",
-        signal: AbortSignal.timeout(10000),
-      }
-    )
+    response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
+      method: options.method ?? "GET",
+      headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      body: requestBody,
+      cache: "no-store",
+      credentials: "include",
+      signal,
+    })
   } catch {
     throw new ApiError(
       "Não foi possível conectar. Verifique sua conexão e tente novamente.",

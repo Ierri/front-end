@@ -33,6 +33,7 @@ export function PostDiscussion({
   const [comments, setComments] = useState(post.comments)
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null)
   const [announcement, setAnnouncement] = useState("")
+  const isApiPost = post.source === "api"
 
   function submitComment(content: string) {
     const comment: FeedCommentData = {
@@ -75,6 +76,8 @@ export function PostDiscussion({
       >
         <CommentThread
           comments={comments}
+          totalCount={post.commentCount}
+          unavailable={isApiPost}
           postAuthor={post.author.avatar}
           activeReplyId={replyTarget?.id}
           onReply={(comment) =>
@@ -88,10 +91,21 @@ export function PostDiscussion({
       </div>
       <PostCommentForm
         replyTarget={replyTarget}
+        available={!isApiPost}
         onCancelReply={() => setReplyTarget(null)}
         onComment={submitComment}
+        onUnavailable={() =>
+          setAnnouncement("Os comentários ainda não estão disponíveis.")
+        }
       />
-      <p role="status" className="sr-only">
+      <p
+        role="status"
+        className={cn(
+          isApiPost && announcement
+            ? "border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-6"
+            : "sr-only"
+        )}
+      >
         {announcement}
       </p>
     </div>

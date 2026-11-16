@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils"
 
 type CommentThreadProps = {
   comments: FeedCommentData[]
+  totalCount?: number
+  unavailable?: boolean
   postAuthor: string
   activeReplyId?: string
   onReply: (comment: FeedCommentData) => void
@@ -146,8 +148,13 @@ function CommentItem({
   )
 }
 
-export function CommentThread({ comments, ...props }: CommentThreadProps) {
-  const count = countComments(comments)
+export function CommentThread({
+  comments,
+  totalCount,
+  unavailable = false,
+  ...props
+}: CommentThreadProps) {
+  const count = totalCount ?? countComments(comments)
   return (
     <section aria-labelledby="post-comments-title">
       <header className="mb-6 flex items-center justify-between gap-3">
@@ -173,9 +180,15 @@ export function CommentThread({ comments, ...props }: CommentThreadProps) {
             aria-hidden="true"
             className="mx-auto mb-3 size-6 text-muted-foreground"
           />
-          <p className="text-sm font-medium">Comece a conversa</p>
+          <p className="text-sm font-medium">
+            {unavailable
+              ? "Comentários ainda indisponíveis"
+              : "Comece a conversa"}
+          </p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Compartilhe o que chamou sua atenção ou uma ideia para o projeto.
+            {unavailable
+              ? "A leitura das conversas será liberada em uma próxima etapa."
+              : "Compartilhe o que chamou sua atenção ou uma ideia para o projeto."}
           </p>
         </div>
       )}

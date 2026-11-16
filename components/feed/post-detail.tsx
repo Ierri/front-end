@@ -29,6 +29,7 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
       <PostMediaGallery
         media={post.media}
         priority
+        unoptimized={post.source === "api"}
         className={cn(
           hasSingleMediaModal
             ? "md:max-h-[min(92svh,58rem)] md:overflow-y-auto"
@@ -51,7 +52,11 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
 
           <p className="text-sm leading-6 text-foreground">{post.content}</p>
 
-          <PostActions score={post.score} authorName={post.author.name} />
+          <PostActions
+            score={post.score}
+            authorName={post.author.name}
+            source={post.source}
+          />
         </div>
 
         <PostDiscussion key={post.id} post={post} modal={modal} />

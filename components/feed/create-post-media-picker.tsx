@@ -89,7 +89,7 @@ export function CreatePostMediaPicker({
           id="post-media"
           name="media"
           type="file"
-          accept="image/*,video/*,.heic,.heif,.mov,.m4v"
+          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.webm"
           multiple
           disabled={disabled}
           tabIndex={-1}

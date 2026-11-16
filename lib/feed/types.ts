@@ -33,12 +33,14 @@ export type FeedCommentData = {
 
 export type FeedPostData = {
   id: string
+  source?: "demo" | "api"
   author: FeedUserData
   content: string
   technologies: TechnologyKey[]
   media: FeedMediaData[]
   score: number
   comments: FeedCommentData[]
+  commentCount?: number
 }
 
 export type RecommendedUserData = {

@@ -1,37 +1,17 @@
 export type PostMediaKind = "image" | "video"
 
-const IMAGE_EXTENSIONS = new Set([
-  "avif",
-  "bmp",
-  "gif",
-  "heic",
-  "heif",
-  "jpeg",
-  "jpg",
-  "png",
-  "svg",
-  "tif",
-  "tiff",
-  "webp",
-])
+const IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
+const IMAGE_EXTENSIONS = new Set(["jpeg", "jpg", "png", "webp"])
 
-const VIDEO_EXTENSIONS = new Set([
-  "3gp",
-  "m4v",
-  "mov",
-  "mp4",
-  "mpeg",
-  "mpg",
-  "ogv",
-  "webm",
-])
+const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/webm"])
+const VIDEO_EXTENSIONS = new Set(["mp4", "webm"])
 
 export function getPostMediaKind(file: {
   name: string
   type: string
 }): PostMediaKind | null {
-  if (file.type.startsWith("image/")) return "image"
-  if (file.type.startsWith("video/")) return "video"
+  if (IMAGE_MIME_TYPES.has(file.type)) return "image"
+  if (VIDEO_MIME_TYPES.has(file.type)) return "video"
 
   const extension = file.name.toLowerCase().split(".").pop()
   if (!extension) return null
