@@ -47,7 +47,13 @@ function Brand() {
   )
 }
 
-export default function AuthPage() {
+export default async function AuthPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>
+}) {
+  const { returnTo } = await searchParams
+
   return (
     <div className="isolate grid min-h-svh bg-background text-foreground lg:grid-cols-3">
       <aside className="relative isolate hidden flex-col justify-between border-r border-border bg-background p-8 before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-[radial-gradient(40%_80%_at_10%_0%,color-mix(in_srgb,var(--foreground)_5%,transparent),transparent)] before:content-[''] lg:flex">
@@ -118,7 +124,7 @@ export default function AuthPage() {
             aria-label="Acesso à comunidade Ierri"
             className="w-full max-w-[336px] py-6 sm:px-2"
           >
-            <AuthForm />
+            <AuthForm returnTo={returnTo} />
           </section>
         </main>
         <footer className="relative z-10 px-6 py-7 text-center text-xs leading-relaxed text-muted-foreground sm:px-10">

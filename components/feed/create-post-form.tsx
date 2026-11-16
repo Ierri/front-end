@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Globe2 } from "lucide-react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import {
   CreatePostMediaPicker,
   type SelectedPostMedia,
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { getPostMediaKind, type PostMediaKind } from "@/lib/feed/media"
-import { currentFeedUser } from "@/lib/feed/mock-data"
 import { cn } from "@/lib/utils"
 
 type CreatePostFormProps = {
@@ -37,6 +37,7 @@ export function CreatePostForm({
   onExit,
 }: CreatePostFormProps) {
   const router = useRouter()
+  const { user } = useAuth()
   const mediaTriggerRef = useRef<HTMLButtonElement>(null)
   const mediaRef = useRef<SelectedPostMedia[]>([])
   const completionTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
@@ -154,13 +155,14 @@ export function CreatePostForm({
       <section className="min-h-0 min-w-0 space-y-6 overflow-y-auto p-5 sm:p-6">
         <div className="flex items-center gap-3">
           <FeedUserAvatar
-            src={currentFeedUser.avatar}
-            name={currentFeedUser.name}
+            src={user?.avatarUrl}
+            name={user?.name ?? "Usuário"}
             size="large"
+            fictitious={false}
           />
           <div className="min-w-0 space-y-1">
             <p className="truncate text-sm font-semibold">
-              {currentFeedUser.name}
+              {user?.name ?? "Usuário"}
             </p>
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Globe2 aria-hidden="true" className="size-3.5" />

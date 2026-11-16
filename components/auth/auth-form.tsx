@@ -1,69 +1,47 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { CredentialsForm } from "./credentials-form"
 import { EmailForm } from "./email-form"
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
-import { authService } from "@/services/auth"
-import type { AuthUser, EmailLookupResult } from "@/services/auth.types"
+import { safeReturnTo } from "@/lib/auth/return-to"
+import type { EmailLookupResult } from "@/services/auth.types"
 
 type AuthFlow =
   | { step: "email"; email: string }
   | ({ step: "credentials"; email: string } & EmailLookupResult)
 
-export function AuthForm() {
+export function AuthForm({ returnTo }: { returnTo?: string }) {
   const router = useRouter()
-  const [session, setSession] = useState<AuthUser | null>(null)
-  const [checking, setChecking] = useState(true)
-  const [error, setError] = useState("")
+  const {
+    status,
+    user: session,
+    error: sessionError,
+    refreshSession,
+    setAuthenticated,
+    logout,
+  } = useAuth()
+  const [actionError, setActionError] = useState("")
   const [leaving, setLeaving] = useState(false)
-  const [attempt, setAttempt] = useState(0)
-  useEffect(() => {
-    let active = true
-    authService
-      .me()
-      .then((user) => {
-        if (active) setSession(user)
-      })
-      .catch((error: unknown) => {
-        if (active)
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Não foi possível verificar sua sessão."
-          )
-      })
-      .finally(() => {
-        if (active) setChecking(false)
-      })
-    return () => {
-      active = false
-    }
-  }, [attempt])
   const [flow, setFlow] = useState<AuthFlow>({ step: "email", email: "" })
+  const error = actionError || sessionError
 
-  if (checking)
+  if (status === "loading")
     return (
       <p role="status" className="text-center text-sm text-muted-foreground">
         Verificando sua sessão…
       </p>
     )
 
-  if (error && !session)
+  if (status === "error")
     return (
       <div className="space-y-4">
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
-        <Button
-          className="w-full"
-          onClick={() => {
-            setError("")
-            setChecking(true)
-            setAttempt((value) => value + 1)
-          }}
-        >
+        <Button className="w-full" onClick={() => void refreshSession()}>
           Tentar novamente
         </Button>
       </div>
@@ -87,15 +65,14 @@ export function AuthForm() {
           disabled={leaving}
           onClick={async () => {
             setLeaving(true)
-            setError("")
+            setActionError("")
             try {
-              await authService.logout()
-              setSession(null)
+              await logout()
               setFlow({ step: "email", email: "" })
-            } catch (error) {
-              setError(
-                error instanceof Error
-                  ? error.message
+            } catch (caught) {
+              setActionError(
+                caught instanceof Error
+                  ? caught.message
                   : "Não foi possível sair."
               )
             } finally {
@@ -122,7 +99,10 @@ export function AuthForm() {
   return (
     <CredentialsForm
       key={flow.nextStep}
-      onAuthenticated={() => router.replace("/")}
+      onAuthenticated={(result) => {
+        setAuthenticated(result.user)
+        router.replace(safeReturnTo(returnTo))
+      }}
       mode={flow.nextStep}
       email={flow.email}
       user={flow.nextStep === "login" ? flow.user : undefined}

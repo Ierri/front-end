@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { CommentThread } from "@/components/feed/comment-thread"
 import { PostCommentForm } from "@/components/feed/post-comment-form"
-import { currentFeedUser } from "@/lib/feed/mock-data"
 import type { FeedCommentData, FeedPostData } from "@/lib/feed/types"
 import { cn } from "@/lib/utils"
 
@@ -29,6 +29,7 @@ export function PostDiscussion({
   post: FeedPostData
   modal: boolean
 }) {
+  const { user } = useAuth()
   const [comments, setComments] = useState(post.comments)
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null)
   const [announcement, setAnnouncement] = useState("")
@@ -36,7 +37,11 @@ export function PostDiscussion({
   function submitComment(content: string) {
     const comment: FeedCommentData = {
       id: crypto.randomUUID(),
-      author: currentFeedUser,
+      author: {
+        name: user?.name ?? "Usuário",
+        avatar: user?.avatarUrl ?? "",
+        fictitious: false,
+      },
       technologies: [],
       content,
       time: "Agora",

@@ -1,28 +1,41 @@
+"use client"
+
 import Link from "next/link"
 import { Plus } from "lucide-react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
-import { currentFeedUser } from "@/lib/feed/mock-data"
 
 export function CreatePostCard() {
+  const { status, user, requireAuth } = useAuth()
+  const isAuthenticated = status === "authenticated"
+
   return (
     <article>
       <Link
         href="/feed/post/new"
+        onClick={(event) => {
+          if (!requireAuth()) event.preventDefault()
+        }}
         aria-label="Criar uma nova publicação"
         className="group flex min-h-28 items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors duration-200 ease-out outline-none hover:border-primary/40 hover:bg-accent/30 focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none sm:p-5"
       >
-        <FeedUserAvatar
-          src={currentFeedUser.avatar}
-          name={currentFeedUser.name}
-          size="large"
-        />
+        {isAuthenticated && user && (
+          <FeedUserAvatar
+            src={user.avatarUrl}
+            name={user.name}
+            size="large"
+            fictitious={false}
+          />
+        )}
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-sm leading-6 font-semibold transition-colors duration-200 group-hover:text-accent-foreground group-focus-visible:text-accent-foreground motion-reduce:transition-none sm:text-base">
-            Criar uma publicação
+            {isAuthenticated ? "Criar uma publicação" : "Entre para postar!"}
           </p>
-          <p className="line-clamp-2 text-xs leading-5 text-muted-foreground sm:text-sm">
-            Compartilhe seu próximo projeto e receba feedback.
+          <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
+            {isAuthenticated
+              ? "Compartilhe seu próximo projeto e receba feedback."
+              : "Faça login na sua conta ou crie uma para começar a mostrar seu trabalho para as pessoas!"}
           </p>
         </div>
         <span

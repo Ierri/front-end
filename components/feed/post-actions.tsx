@@ -1,5 +1,8 @@
+"use client"
+
 import { ArrowBigDown, ArrowBigUp, Bookmark } from "lucide-react"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +17,13 @@ export function PostActions({
   authorName,
   className,
 }: PostActionsProps) {
+  const { status, requireAuth } = useAuth()
+  const isAuthenticated = status === "authenticated"
+
+  function handleUnavailableAction() {
+    if (!isAuthenticated) requireAuth()
+  }
+
   return (
     <div className={cn("flex items-center justify-between", className)}>
       <div
@@ -26,7 +36,8 @@ export function PostActions({
           variant="ghost"
           size="icon-sm"
           aria-label="Dar upvote"
-          aria-disabled="true"
+          aria-disabled={isAuthenticated}
+          onClick={handleUnavailableAction}
           className="rounded-full"
         >
           <ArrowBigUp />
@@ -42,7 +53,8 @@ export function PostActions({
           variant="ghost"
           size="icon-sm"
           aria-label="Dar downvote"
-          aria-disabled="true"
+          aria-disabled={isAuthenticated}
+          onClick={handleUnavailableAction}
           className="rounded-full"
         >
           <ArrowBigDown />
@@ -54,7 +66,8 @@ export function PostActions({
         variant="outline"
         size="icon-lg"
         aria-label="Salvar publicação"
-        aria-disabled="true"
+        aria-disabled={isAuthenticated}
+        onClick={handleUnavailableAction}
         className="rounded-full"
       >
         <Bookmark />

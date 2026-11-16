@@ -11,6 +11,7 @@ export type TechnologyKey =
 export type FeedUserData = {
   name: string
   avatar: string
+  fictitious?: boolean
 }
 
 export type FeedMediaData = {

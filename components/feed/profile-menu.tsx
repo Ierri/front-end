@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Bookmark, UserRound } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -15,47 +15,18 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { authService } from "@/services/auth"
-import type { AuthUser } from "@/services/auth.types"
-
 export function ProfileMenu() {
   const router = useRouter()
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, logout: endSession } = useAuth()
   const [leaving, setLeaving] = useState(false)
   const [error, setError] = useState("")
-  const [attempt, setAttempt] = useState(0)
-
-  useEffect(() => {
-    let active = true
-    authService
-      .me()
-      .then((session) => {
-        if (active) setUser(session)
-      })
-      .catch((error: unknown) => {
-        if (active)
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Não foi possível verificar sua sessão."
-          )
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-    return () => {
-      active = false
-    }
-  }, [attempt])
 
   async function logout() {
     if (leaving) return
     setLeaving(true)
     setError("")
     try {
-      await authService.logout()
-      setUser(null)
+      await endSession()
       router.replace("/auth")
       router.refresh()
     } catch (error) {
@@ -96,12 +67,10 @@ export function ProfileMenu() {
         align="end"
         sideOffset={12}
         className="w-72 max-w-[calc(100vw-2rem)] p-4"
-        aria-busy={loading || leaving}
+        aria-busy={leaving}
       >
         <PopoverHeader>
-          <PopoverTitle>
-            {loading ? "Verificando sessão…" : (user?.name ?? "Sua conta")}
-          </PopoverTitle>
+          <PopoverTitle>{user?.name ?? "Sua conta"}</PopoverTitle>
           <PopoverDescription>
             {user
               ? "Acesse seu perfil e suas publicações salvas."
@@ -113,7 +82,7 @@ export function ProfileMenu() {
             {error}
           </p>
         )}
-        {!loading && user && (
+        {user && (
           <div className="-mx-2 space-y-1">
             <Button
               type="button"
@@ -143,28 +112,6 @@ export function ProfileMenu() {
             </Button>
           </div>
         )}
-        {!loading &&
-          !user &&
-          (error ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setError("")
-                setLoading(true)
-                setAttempt((value) => value + 1)
-              }}
-            >
-              Tentar novamente
-            </Button>
-          ) : (
-            <Link
-              href="/auth"
-              className="rounded-lg bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Entrar
-            </Link>
-          ))}
       </PopoverContent>
     </Popover>
   )
