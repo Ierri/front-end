@@ -180,8 +180,28 @@ export const feedPosts: FeedPostData[] = [
   },
 ]
 
+const profileDemoPostTitles: Record<string, string> = {
+  "analytics-studio": "Analytics Studio",
+  "wellness-mobile": "Wellness Mobile",
+  "commerce-system": "Commerce System",
+}
+
+export const profilePosts: FeedPostData[] = feedPosts.slice(0, 3).map((post) => ({
+  ...post,
+  id: `rafael-${post.id}`,
+  author: currentFeedUser,
+  content: post.content,
+}))
+
 export function getFeedPostById(postId: string) {
-  return feedPosts.find((post) => post.id === postId)
+  return (
+    feedPosts.find((post) => post.id === postId) ??
+    profilePosts.find((post) => post.id === postId)
+  )
+}
+
+export function getProfilePostTitle(postId: string) {
+  return profileDemoPostTitles[postId.replace(/^rafael-/, "")] ?? "Projeto"
 }
 
 export const recommendedUsers: RecommendedUserData[] = [

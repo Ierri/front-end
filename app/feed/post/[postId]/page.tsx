@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { PostDetail } from "@/components/feed/post-detail"
-import { feedPosts, getFeedPostById } from "@/lib/feed/mock-data"
+import { feedPosts, getFeedPostById, profilePosts } from "@/lib/feed/mock-data"
 
 type PostPageProps = {
   params: Promise<{ postId: string }>
@@ -11,7 +11,7 @@ type PostPageProps = {
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return feedPosts.map((post) => ({ postId: post.id }))
+  return [...feedPosts, ...profilePosts].map((post) => ({ postId: post.id }))
 }
 
 export async function generateMetadata({
