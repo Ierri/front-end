@@ -17,9 +17,10 @@ const emptyPage: FeedPageData = {
 export default async function FeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; autorId?: string }>
 }) {
-  const { tab } = await searchParams
+  const { tab, autorId } = await searchParams
+  const authorId = autorId?.trim() || undefined
   const isDemoTab = tab === "following" || tab === "top"
   const demoPosts =
     tab === "following"
@@ -33,7 +34,7 @@ export default async function FeedPage({
   let initialError = ""
   if (!isDemoTab) {
     try {
-      initialPage = await publicationsService.list()
+      initialPage = await publicationsService.list({ authorId })
     } catch (error) {
       initialError =
         error instanceof Error
@@ -72,8 +73,10 @@ export default async function FeedPage({
             demoPosts.map((post) => <FeedPostCard key={post.id} post={post} />)
           ) : (
             <InfiniteFeed
+              key={authorId ?? "all"}
               initialPage={initialPage}
               initialError={initialError}
+              authorId={authorId}
             />
           )}
         </div>

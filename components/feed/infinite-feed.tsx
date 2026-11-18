@@ -10,11 +10,13 @@ import { publicationsService, type FeedPageData } from "@/services/publications"
 type InfiniteFeedProps = {
   initialPage: FeedPageData
   initialError?: string
+  authorId?: string
 }
 
 export function InfiniteFeed({
   initialPage,
   initialError = "",
+  authorId,
 }: InfiniteFeedProps) {
   const [posts, setPosts] = useState(initialPage.items)
   const [cursor, setCursor] = useState(initialPage.nextCursor)
@@ -38,6 +40,7 @@ export function InfiniteFeed({
     try {
       const page = await publicationsService.list({
         cursor,
+        authorId,
         signal: controller.signal,
       })
       setPosts((current) => {
@@ -62,7 +65,7 @@ export function InfiniteFeed({
         setIsLoading(false)
       }
     }
-  }, [cursor, hasMore, posts.length])
+  }, [authorId, cursor, hasMore, posts.length])
 
   useEffect(() => {
     const sentinel = sentinelRef.current

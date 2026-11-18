@@ -9,6 +9,8 @@ export type TechnologyKey =
   | "cloud"
 
 export type FeedUserData = {
+  id?: string
+  username?: string
   name: string
   avatar: string
   fictitious?: boolean

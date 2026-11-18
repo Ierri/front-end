@@ -75,6 +75,8 @@ function toFeedPost(
     id: publication.id,
     source: "api",
     author: {
+      id: publication.autor.id,
+      username: publication.autor.username,
       name: publication.autor.nome,
       avatar: publication.autor.avatarUrl ?? "",
       fictitious: false,
@@ -101,14 +103,17 @@ export const publicationsService = {
   async list({
     limit = 20,
     cursor,
+    authorId,
     signal,
   }: {
     limit?: number
     cursor?: string | null
+    authorId?: string
     signal?: AbortSignal
   } = {}): Promise<FeedPageData> {
     const query = new URLSearchParams({ limite: String(limit) })
     if (cursor) query.set("cursor", cursor)
+    if (authorId) query.set("autorId", authorId)
     const result = await apiRequest(
       `/publicacoes?${query}`,
       publicationPageSchema,
