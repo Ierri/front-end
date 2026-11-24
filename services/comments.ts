@@ -2,17 +2,19 @@ import { z } from "zod"
 
 import { formatRelativeTime } from "@/lib/feed/format-time"
 import type { FeedCommentData } from "@/lib/feed/types"
-import { ApiError, apiRequest } from "@/services/api"
+import {
+  ApiError,
+  apiRequest,
+  assertLimit,
+  assertObjectId,
+  isAuthApiError,
+  safeAvatarUrl,
+} from "@/services/api"
 
+export { isAuthApiError }
 export const COMMENT_MAX_LENGTH = 2000
 
-const objectIdPattern = /^[a-f\d]{24}$/i
 const idempotencyKeyPattern = /^[A-Za-z0-9_-]{16,128}$/
-const authErrorCodes = new Set([
-  "AUTH_REQUIRED",
-  "TOKEN_REQUIRED",
-  "INVALID_TOKEN",
-])
 
 const commentAuthorSchema = z.object({
   id: z.string(),
@@ -46,18 +48,6 @@ export type CommentPageData = {
   hasMore: boolean
 }
 
-export function isAuthApiError(error: unknown): boolean {
-  return error instanceof ApiError && authErrorCodes.has(error.code)
-}
-
-function assertObjectId(value: string): string {
-  const normalized = value.trim()
-  if (!objectIdPattern.test(normalized)) {
-    throw new ApiError("Identificador inválido.", "VALIDATION_ERROR")
-  }
-  return normalized
-}
-
 function assertContent(content: string): string {
   const trimmed = content.trim()
   if (!trimmed) {
@@ -73,29 +63,6 @@ function assertContent(content: string): string {
     )
   }
   return trimmed
-}
-
-function assertLimit(limit: number): number {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
-    throw new ApiError("Limite inválido.", "VALIDATION_ERROR")
-  }
-  return limit
-}
-
-function safeAvatarUrl(url: string | null): string {
-  if (!url) return ""
-  const trimmed = url.trim()
-  if (!trimmed) return ""
-  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed
-  try {
-    const parsed = new URL(trimmed)
-    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
-      return parsed.href
-    }
-  } catch {
-    return ""
-  }
-  return ""
 }
 
 function toFeedComment(

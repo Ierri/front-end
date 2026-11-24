@@ -50,6 +50,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
 
       <footer className="p-4">
         <PostActions
+          postId={post.id}
           score={post.score}
           authorName={post.author.name}
           source={post.source}

@@ -1,7 +1,13 @@
 import { z } from "zod"
 
 import type { FeedPostData } from "@/lib/feed/types"
-import { apiRequest } from "@/services/api"
+import {
+  ApiError,
+  apiRequest,
+  assertLimit,
+  assertObjectId,
+  safeAvatarUrl,
+} from "@/services/api"
 
 const authorSchema = z.object({
   id: z.string(),
@@ -24,7 +30,7 @@ const mediaSchema = z.object({
   ordem: z.number(),
 })
 
-const publicationSchema = z.object({
+export const publicationSchema = z.object({
   id: z.string(),
   slug: z.string(),
   autor: authorSchema,
@@ -68,7 +74,10 @@ export type FeedPageData = {
   hasMore: boolean
 }
 
-function toFeedPost(
+export type FeedScope = "seguindo"
+export type FeedOrder = "score"
+
+export function toFeedPost(
   publication: z.infer<typeof publicationSchema>
 ): FeedPostData {
   return {
@@ -78,7 +87,7 @@ function toFeedPost(
       id: publication.autor.id,
       username: publication.autor.username,
       name: publication.autor.nome,
-      avatar: publication.autor.avatarUrl ?? "",
+      avatar: safeAvatarUrl(publication.autor.avatarUrl),
       fictitious: false,
     },
     content: publication.conteudo,
@@ -104,16 +113,28 @@ export const publicationsService = {
     limit = 20,
     cursor,
     authorId,
+    scope,
+    order,
     signal,
   }: {
     limit?: number
     cursor?: string | null
     authorId?: string
+    scope?: FeedScope
+    order?: FeedOrder
     signal?: AbortSignal
   } = {}): Promise<FeedPageData> {
-    const query = new URLSearchParams({ limite: String(limit) })
+    if (scope === "seguindo" && authorId) {
+      throw new ApiError(
+        "autorId não pode ser combinado com escopo=seguindo.",
+        "VALIDATION_ERROR"
+      )
+    }
+    const query = new URLSearchParams({ limite: String(assertLimit(limit)) })
     if (cursor) query.set("cursor", cursor)
-    if (authorId) query.set("autorId", authorId)
+    if (authorId) query.set("autorId", assertObjectId(authorId))
+    if (scope) query.set("escopo", scope)
+    if (order) query.set("ordem", order)
     const result = await apiRequest(
       `/publicacoes?${query}`,
       publicationPageSchema,
@@ -127,7 +148,11 @@ export const publicationsService = {
   },
 
   async findById(id: string): Promise<FeedPostData> {
-    const result = await apiRequest(`/publicacoes/${id}`, publicationSchema)
+    const publicationId = assertObjectId(id)
+    const result = await apiRequest(
+      `/publicacoes/${publicationId}`,
+      publicationSchema
+    )
     return toFeedPost(result.data)
   },
 
