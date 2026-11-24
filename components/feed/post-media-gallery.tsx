@@ -7,12 +7,14 @@ type PostMediaGalleryProps = {
   media: FeedMediaData[]
   className?: string
   priority?: boolean
+  unoptimized?: boolean
 }
 
 export function PostMediaGallery({
   media,
   className,
   priority = false,
+  unoptimized = false,
 }: PostMediaGalleryProps) {
   return (
     <section
@@ -31,6 +33,7 @@ export function PostMediaGallery({
               src={item.src}
               alt={item.alt}
               fill
+              unoptimized={unoptimized}
               priority={priority && index === 0}
               sizes="(max-width: 1024px) 100vw, 65vw"
               className="object-cover"

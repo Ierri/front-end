@@ -2,23 +2,17 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { PostDetail } from "@/components/feed/post-detail"
-import { feedPosts, getFeedPostById, profilePosts } from "@/lib/feed/mock-data"
+import { getFeedPost } from "@/lib/feed/get-feed-post"
 
 type PostPageProps = {
   params: Promise<{ postId: string }>
-}
-
-export const dynamicParams = false
-
-export function generateStaticParams() {
-  return [...feedPosts, ...profilePosts].map((post) => ({ postId: post.id }))
 }
 
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { postId } = await params
-  const post = getFeedPostById(postId)
+  const post = await getFeedPost(postId)
 
   if (!post) return { title: "Publicação não encontrada" }
 
@@ -30,7 +24,7 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: PostPageProps) {
   const { postId } = await params
-  const post = getFeedPostById(postId)
+  const post = await getFeedPost(postId)
 
   if (!post) notFound()
 

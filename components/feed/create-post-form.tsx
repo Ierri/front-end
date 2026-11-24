@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { getPostMediaKind, type PostMediaKind } from "@/lib/feed/media"
 import { cn } from "@/lib/utils"
+import { publicationsService } from "@/services/publications"
 
 type CreatePostFormProps = {
   variant?: "page" | "modal"
@@ -22,6 +23,10 @@ type CreatePostFormProps = {
 }
 
 let mediaIdSequence = 0
+const maxMediaCount = 10
+const maxMediaSize = 25_000_000
+const maxTotalMediaSize = 200_000_000
+const uploadConcurrency = 3
 
 function createMediaId() {
   mediaIdSequence += 1
@@ -32,6 +37,35 @@ function releasePreviewUrls(media: SelectedPostMedia[]) {
   media.forEach((item) => URL.revokeObjectURL(item.previewUrl))
 }
 
+async function uploadMedia(
+  media: SelectedPostMedia[],
+  signal: AbortSignal,
+  onProgress: (completed: number) => void
+) {
+  const references = new Array<string>(media.length)
+  let nextIndex = 0
+  let completed = 0
+  async function worker() {
+    while (nextIndex < media.length) {
+      const index = nextIndex
+      nextIndex += 1
+      const uploaded = await publicationsService.upload(
+        media[index].file,
+        signal
+      )
+      references[index] = uploaded.referencia
+      completed += 1
+      onProgress(completed)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(uploadConcurrency, media.length) }, () =>
+      worker()
+    )
+  )
+  return references
+}
+
 export function CreatePostForm({
   variant = "page",
   onExit,
@@ -40,17 +74,20 @@ export function CreatePostForm({
   const { user } = useAuth()
   const mediaTriggerRef = useRef<HTMLButtonElement>(null)
   const mediaRef = useRef<SelectedPostMedia[]>([])
-  const completionTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const requestRef = useRef<AbortController | null>(null)
   const [content, setContent] = useState("")
   const [media, setMedia] = useState<SelectedPostMedia[]>([])
   const [error, setError] = useState("")
+  const [contentError, setContentError] = useState("")
+  const [requestError, setRequestError] = useState("")
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     return () => {
       releasePreviewUrls(mediaRef.current)
       mediaRef.current = []
-      if (completionTimerRef.current) clearTimeout(completionTimerRef.current)
+      requestRef.current?.abort()
     }
   }, [])
 
@@ -67,21 +104,41 @@ export function CreatePostForm({
       const kind = getPostMediaKind(file)
       if (kind) supportedFiles.push({ file, kind })
     }
-    setError(
-      supportedFiles.length === files.length
-        ? ""
-        : "Alguns arquivos foram ignorados. Selecione apenas imagens ou vídeos."
+    const rejectedByType = supportedFiles.length !== files.length
+    const acceptedBySize = supportedFiles.filter(
+      ({ file }) => file.size <= maxMediaSize
     )
+    const availableSlots = Math.max(0, maxMediaCount - mediaRef.current.length)
+    const accepted = acceptedBySize.slice(0, availableSlots)
 
-    if (!supportedFiles.length) return
+    if (rejectedByType) {
+      setError("Use apenas JPEG, PNG, WebP, MP4 ou WebM.")
+    } else if (acceptedBySize.length !== supportedFiles.length) {
+      setError("Cada arquivo pode ter no máximo 25 MB.")
+    } else if (accepted.length !== acceptedBySize.length) {
+      setError("Você pode adicionar no máximo 10 mídias.")
+    } else {
+      setError("")
+    }
 
-    const additions = supportedFiles.map(({ file, kind }) => ({
+    if (!accepted.length) return
+
+    const additions = accepted.map(({ file, kind }) => ({
       id: createMediaId(),
       file,
       kind,
       previewUrl: URL.createObjectURL(file),
     }))
-    replaceMedia([...mediaRef.current, ...additions])
+    const nextMedia = [...mediaRef.current, ...additions]
+    if (
+      nextMedia.reduce((total, item) => total + item.file.size, 0) >
+      maxTotalMediaSize
+    ) {
+      releasePreviewUrls(additions)
+      setError("O conjunto de mídias pode ter no máximo 200 MB.")
+      return
+    }
+    replaceMedia(nextMedia)
   }
 
   function selectCover(id: string) {
@@ -112,9 +169,16 @@ export function CreatePostForm({
     else router.push("/feed")
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (isSubmitting) return
+
+    const trimmedContent = content.trim()
+    if (!trimmedContent) {
+      setContentError("Conte um pouco sobre o projeto antes de publicar.")
+      document.getElementById("post-content")?.focus()
+      return
+    }
 
     if (!media.length) {
       setError("Adicione pelo menos uma imagem ou um vídeo para publicar.")
@@ -123,13 +187,44 @@ export function CreatePostForm({
     }
 
     setError("")
+    setContentError("")
+    setRequestError("")
+    setUploadProgress(0)
     setIsSubmitting(true)
 
-    completionTimerRef.current = setTimeout(() => {
+    const controller = new AbortController()
+    requestRef.current = controller
+    try {
+      const references = await uploadMedia(
+        media,
+        controller.signal,
+        setUploadProgress
+      )
+      const post = await publicationsService.create({
+        content: trimmedContent,
+        mediaReferences: references,
+        signal: controller.signal,
+      })
       clearMedia()
       setContent("")
-      exitComposer()
-    }, 700)
+      router.push(`/feed/post/${post.id}`)
+      router.refresh()
+    } catch (submitError) {
+      if (controller.signal.aborted) return
+      setRequestError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Não foi possível publicar. Tente novamente."
+      )
+      setIsSubmitting(false)
+      setUploadProgress(0)
+      controller.abort()
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false)
+        setUploadProgress(0)
+      }
+    }
   }
 
   return (
@@ -193,12 +288,29 @@ export function CreatePostForm({
               rows={3}
               value={content}
               disabled={isSubmitting}
-              aria-describedby="post-content-help"
+              aria-invalid={Boolean(contentError)}
+              aria-describedby={
+                contentError
+                  ? "post-content-help post-content-error"
+                  : "post-content-help"
+              }
               placeholder="O que você criou? Conte a ideia, os desafios ou em que gostaria de receber feedback."
-              onChange={(event) => setContent(event.target.value)}
+              onChange={(event) => {
+                setContent(event.target.value)
+                setContentError("")
+              }}
               className="field-sizing-content max-h-60 min-h-24 resize-none overflow-y-auto rounded-none border-0 bg-transparent p-0 text-base leading-7 shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
           </div>
+          {contentError && (
+            <p
+              id="post-content-error"
+              role="alert"
+              className="mt-2 text-sm text-destructive"
+            >
+              {contentError}
+            </p>
+          )}
           {content.length > 0 && (
             <div className="mt-2 text-right text-xs leading-5 text-muted-foreground">
               <span className="tabular-nums">
@@ -219,6 +331,15 @@ export function CreatePostForm({
           onRemove={removeMedia}
           onSelectCover={selectCover}
         />
+        {requestError && (
+          <p
+            id="post-request-error"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {requestError}
+          </p>
+        )}
       </section>
 
       <footer className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border bg-background px-5 py-4 sm:px-6">
@@ -233,7 +354,11 @@ export function CreatePostForm({
             Cancelar
           </Button>
           <Button type="submit" className="h-10 px-5" disabled={isSubmitting}>
-            {isSubmitting ? "Publicando…" : "Publicar"}
+            {isSubmitting
+              ? uploadProgress < media.length
+                ? `Enviando ${uploadProgress} de ${media.length}…`
+                : "Publicando…"
+              : "Publicar"}
           </Button>
         </div>
       </footer>

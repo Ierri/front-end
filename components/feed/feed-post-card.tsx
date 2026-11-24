@@ -32,6 +32,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
               src={cover.src}
               alt={cover.alt}
               fill
+              unoptimized={post.source === "api"}
               sizes="(max-width: 1024px) calc(100vw - 2rem), (max-width: 1280px) calc(100vw - 9rem), 48rem"
               className="object-cover"
             />
@@ -48,7 +49,11 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
       </Link>
 
       <footer className="p-4">
-        <PostActions score={post.score} authorName={post.author.name} />
+        <PostActions
+          score={post.score}
+          authorName={post.author.name}
+          source={post.source}
+        />
       </footer>
     </article>
   )

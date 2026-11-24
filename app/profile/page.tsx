@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
   BriefcaseBusiness,
@@ -12,21 +12,18 @@ import {
   MapPin,
   PencilLine,
   Plus,
+  RefreshCw,
   UserRound,
 } from "lucide-react"
-import type { TechnologyKey } from "@/lib/feed/types"
+import type { FeedPostData, TechnologyKey } from "@/lib/feed/types"
 
 import { FeedHeader } from "@/components/feed/feed-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authService } from "@/services/auth"
 import type { AuthUser } from "@/services/auth.types"
+import { publicationsService } from "@/services/publications"
 import {
   defaultDemoProfile,
   readDemoProfile,
@@ -40,11 +37,6 @@ const demoStats = [
   { label: "Projetos", value: "3" },
   { label: "Seguidores", value: "128" },
   { label: "Seguindo", value: "46" },
-]
-const unavailableStats = [
-  { label: "Projetos", value: "—" },
-  { label: "Seguidores", value: "—" },
-  { label: "Seguindo", value: "—" },
 ]
 const socialLinks = [
   { key: "website", label: "Site", icon: Globe2 },
@@ -76,16 +68,67 @@ function initials(name: string) {
 export default function ProfilePage() {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const [demoProfile, setDemoProfile] = useState<DemoProfile>(defaultDemoProfile)
+  const [demoProfile, setDemoProfile] =
+    useState<DemoProfile>(defaultDemoProfile)
+  const [projects, setProjects] = useState<FeedPostData[]>([])
+  const [projectsCursor, setProjectsCursor] = useState<string | null>(null)
+  const [projectsHasMore, setProjectsHasMore] = useState(false)
+  const [projectsLoading, setProjectsLoading] = useState(false)
+  const [projectsError, setProjectsError] = useState("")
+  const projectsRequestRef = useRef<AbortController | null>(null)
+
+  const loadUserProjects = useCallback(
+    async (authorId: string, cursor?: string | null) => {
+      projectsRequestRef.current?.abort()
+      const controller = new AbortController()
+      projectsRequestRef.current = controller
+      setProjectsLoading(true)
+      setProjectsError("")
+      try {
+        const page = await publicationsService.list({
+          authorId,
+          cursor,
+          signal: controller.signal,
+        })
+        if (controller.signal.aborted) return
+        setProjects((current) => {
+          if (!cursor) return page.items
+          const knownIds = new Set(current.map((item) => item.id))
+          return [
+            ...current,
+            ...page.items.filter((item) => !knownIds.has(item.id)),
+          ]
+        })
+        setProjectsCursor(page.nextCursor)
+        setProjectsHasMore(page.hasMore)
+      } catch (caught) {
+        if (controller.signal.aborted) return
+        setProjectsError(
+          caught instanceof Error
+            ? caught.message
+            : "Não foi possível carregar suas publicações."
+        )
+      } finally {
+        if (!controller.signal.aborted) {
+          setProjectsLoading(false)
+        }
+      }
+    },
+    []
+  )
 
   useEffect(() => {
     let active = true
+    const requestController = projectsRequestRef
     authService
       .me()
       .then((session) => {
-        if (active) {
-          setUser(session)
-          if (!session) setDemoProfile(readDemoProfile())
+        if (!active) return
+        setUser(session)
+        if (session) {
+          void loadUserProjects(session.id)
+        } else {
+          setDemoProfile(readDemoProfile())
         }
       })
       .catch(() => {
@@ -101,8 +144,23 @@ export default function ProfilePage() {
 
     return () => {
       active = false
+      requestController.current?.abort()
     }
-  }, [])
+  }, [loadUserProjects])
+
+  const userStats = [
+    {
+      label: "Projetos",
+      value:
+        projectsLoading && !projects.length
+          ? "…"
+          : projectsError && !projects.length
+            ? "—"
+            : `${projects.length}${projectsHasMore ? "+" : ""}`,
+    },
+    { label: "Seguidores", value: "—" },
+    { label: "Seguindo", value: "—" },
+  ]
 
   return (
     <div className="min-h-svh bg-background">
@@ -143,41 +201,49 @@ export default function ProfilePage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                      <p className="mb-1 text-sm font-medium text-accent-foreground">
-                        @{user?.username ?? demoProfile.username}
-                      </p>
-                    <h1 className="break-words text-3xl font-bold tracking-tight sm:text-4xl">
+                    <p className="mb-1 text-sm font-medium text-accent-foreground">
+                      @{user?.username ?? demoProfile.username}
+                    </p>
+                    <h1 className="text-3xl font-bold tracking-tight break-words sm:text-4xl">
                       {user?.name ?? demoProfile.name}
                     </h1>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-                  {user ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled
-                      title="A edição de perfil ainda não está disponível na API."
-                      className="h-10 w-full gap-2 rounded-xl px-4 sm:w-auto"
-                    >
-                      <PencilLine aria-hidden="true" className="size-4 text-accent-foreground" />
-                      Editar perfil
-                    </Button>
-                  ) : (
-                    <Link
-                      href="/profile/edit"
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-accent-foreground/30 hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto"
-                    >
-                      <PencilLine aria-hidden="true" className="size-4 text-accent-foreground" />
-                      Editar perfil
-                    </Link>
-                  )}
+                    {user ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled
+                        title="A edição de perfil ainda não está disponível na API."
+                        className="h-10 w-full gap-2 rounded-xl px-4 sm:w-auto"
+                      >
+                        <PencilLine
+                          aria-hidden="true"
+                          className="size-4 text-accent-foreground"
+                        />
+                        Editar perfil
+                      </Button>
+                    ) : (
+                      <Link
+                        href="/profile/edit"
+                        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-accent-foreground/30 hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:w-auto"
+                      >
+                        <PencilLine
+                          aria-hidden="true"
+                          className="size-4 text-accent-foreground"
+                        />
+                        Editar perfil
+                      </Link>
+                    )}
                   </div>
                 </div>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
                   {user?.bio || demoProfile.bio}
                 </p>
-                {!user && demoProfile.highlightEnabled && demoProfile.highlight.trim() ? (
+                {!user &&
+                demoProfile.highlightEnabled &&
+                demoProfile.highlight.trim() ? (
                   <p className="mt-3 inline-flex rounded-full bg-accent px-3.5 py-1.5 text-sm font-medium text-accent-foreground">
                     {demoProfile.highlight}
                   </p>
@@ -192,7 +258,9 @@ export default function ProfilePage() {
                   ) : (
                     <span className="inline-flex items-center gap-2">
                       <Globe2 aria-hidden="true" className="size-4" />
-                      {user ? "Links sociais indisponíveis" : "Adicione sua localização"}
+                      {user
+                        ? "Links sociais indisponíveis"
+                        : "Adicione sua localização"}
                     </span>
                   )}
                   <span className="inline-flex items-center gap-2">
@@ -202,7 +270,9 @@ export default function ProfilePage() {
                 </div>
 
                 <section className="mt-6" aria-label="Stacks em destaque">
-                  <h2 className="mb-3 text-sm font-semibold">Stacks em destaque</h2>
+                  <h2 className="mb-3 text-sm font-semibold">
+                    Stacks em destaque
+                  </h2>
                   {!user ? (
                     <ProfileStackGrid
                       technologies={demoProfile.technologies}
@@ -218,7 +288,7 @@ export default function ProfilePage() {
                 </section>
 
                 <dl className="mt-7 flex flex-wrap gap-x-9 gap-y-4 border-t border-border pt-5">
-                  {(user ? unavailableStats : demoStats).map((stat) => (
+                  {(user ? userStats : demoStats).map((stat) => (
                     <div key={stat.label} className="flex items-baseline gap-2">
                       <dt className="text-sm text-muted-foreground">
                         {stat.label}
@@ -256,21 +326,99 @@ export default function ProfilePage() {
                 </TabsTrigger>
               </TabsList>
               {user ? (
-                <Button
-                  type="button"
-                  disabled
-                  variant="outline"
-                  title="A publicação de projetos ainda não está disponível na API."
-                  className="gap-2"
+                <Link
+                  href="/feed/post/new"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                 >
-                  <Plus aria-hidden="true" />
+                  <Plus aria-hidden="true" className="size-4" />
                   Novo projeto
-                </Button>
+                </Link>
               ) : null}
             </div>
 
-            <TabsContent value="projects" className="mt-0">
-              <ProfileProjectGrid posts={user ? [] : profilePosts} />
+            <TabsContent value="projects" className="mt-0 space-y-6">
+              {user ? (
+                projectsLoading && !projects.length ? (
+                  <div
+                    role="status"
+                    className="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/40 px-5 py-12 text-sm text-muted-foreground"
+                  >
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="mr-2 size-4 animate-spin motion-reduce:animate-none"
+                    />
+                    Carregando publicações…
+                  </div>
+                ) : projectsError && !projects.length ? (
+                  <div
+                    role="alert"
+                    className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-border bg-card px-5 py-12 text-center"
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      {projectsError}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => void loadUserProjects(user.id)}
+                    >
+                      <RefreshCw aria-hidden="true" />
+                      Tentar novamente
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <ProfileProjectGrid posts={projects} />
+                    {projectsError ? (
+                      <div
+                        role="alert"
+                        className="rounded-2xl border border-border bg-card px-6 py-6 text-center"
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          {projectsError}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="mt-4"
+                          onClick={() =>
+                            void loadUserProjects(user.id, projectsCursor)
+                          }
+                        >
+                          <RefreshCw aria-hidden="true" />
+                          Tentar novamente
+                        </Button>
+                      </div>
+                    ) : projectsHasMore ? (
+                      <div className="flex justify-center">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={projectsLoading}
+                          onClick={() =>
+                            void loadUserProjects(user.id, projectsCursor)
+                          }
+                        >
+                          {projectsLoading ? (
+                            <>
+                              <LoaderCircle
+                                aria-hidden="true"
+                                className="size-4 animate-spin motion-reduce:animate-none"
+                              />
+                              Carregando…
+                            </>
+                          ) : (
+                            "Carregar mais"
+                          )}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </>
+                )
+              ) : (
+                <ProfileProjectGrid posts={profilePosts} />
+              )}
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
@@ -295,16 +443,26 @@ export default function ProfilePage() {
 
                   <div className="mt-6 grid gap-4 border-t border-border pt-5 sm:grid-cols-2">
                     <div className="flex items-start gap-3">
-                      <MapPin aria-hidden="true" className="mt-0.5 size-4 text-accent-foreground" />
+                      <MapPin
+                        aria-hidden="true"
+                        className="mt-0.5 size-4 text-accent-foreground"
+                      />
                       <div>
-                        <p className="text-xs text-muted-foreground">Localização</p>
+                        <p className="text-xs text-muted-foreground">
+                          Localização
+                        </p>
                         <p className="mt-1 text-sm font-medium">
-                          {!user && demoProfile.location ? demoProfile.location : "Não informada"}
+                          {!user && demoProfile.location
+                            ? demoProfile.location
+                            : "Não informada"}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <BriefcaseBusiness aria-hidden="true" className="mt-0.5 size-4 text-accent-foreground" />
+                      <BriefcaseBusiness
+                        aria-hidden="true"
+                        className="mt-0.5 size-4 text-accent-foreground"
+                      />
                       <div>
                         <p className="text-xs text-muted-foreground">Atuação</p>
                         <p className="mt-1 text-sm font-medium">
@@ -315,7 +473,9 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="mt-6 border-t border-border pt-5">
-                    <h3 className="text-sm font-semibold">Stacks e tecnologias</h3>
+                    <h3 className="text-sm font-semibold">
+                      Stacks e tecnologias
+                    </h3>
                     {!user && demoProfile.technologies.length ? (
                       <ul className="mt-3 flex flex-wrap gap-2">
                         {demoProfile.technologies.map((technology) => (
@@ -370,8 +530,13 @@ export default function ProfilePage() {
                             rel="noreferrer"
                             className="group flex items-center gap-3 rounded-xl border border-border px-3.5 py-3 transition-colors hover:border-accent-foreground/30 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                           >
-                            <SocialIcon aria-hidden="true" className="size-4 text-accent-foreground" />
-                            <span className="flex-1 text-sm font-medium">{label}</span>
+                            <SocialIcon
+                              aria-hidden="true"
+                              className="size-4 text-accent-foreground"
+                            />
+                            <span className="flex-1 text-sm font-medium">
+                              {label}
+                            </span>
                             <span className="text-xs text-muted-foreground transition-colors group-hover:text-accent-foreground">
                               Acessar
                             </span>
