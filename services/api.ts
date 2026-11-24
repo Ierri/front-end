@@ -27,12 +27,12 @@ export async function apiRequest<T>(
   options: {
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
     body?: unknown
+    headers?: Record<string, string>
     signal?: AbortSignal
     timeoutMs?: number
   } = {}
 ): Promise<{ message: string; data: T }> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL?.trim() || defaultApiUrl
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || defaultApiUrl
   const isFormData =
     typeof FormData !== "undefined" && options.body instanceof FormData
   const timeoutSignal = AbortSignal.timeout(options.timeoutMs ?? 10000)
@@ -45,11 +45,15 @@ export async function apiRequest<T>(
       : isFormData
         ? (options.body as FormData)
         : JSON.stringify(options.body)
+  const headers = new Headers(options.headers)
+  if (!isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json")
+  }
   let response: Response
   try {
     response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
       method: options.method ?? "GET",
-      headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      headers,
       body: requestBody,
       cache: "no-store",
       credentials: "include",

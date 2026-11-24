@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react"
-import { ArrowUp, X } from "lucide-react"
+import { ArrowUp, LoaderCircle, X } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -9,18 +9,23 @@ import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import type { ReplyTarget } from "@/components/feed/post-discussion"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { COMMENT_MAX_LENGTH } from "@/services/comments"
 
 type PostCommentFormProps = {
   replyTarget: ReplyTarget | null
   available?: boolean
+  isSubmitting?: boolean
+  error?: string
   onCancelReply: () => void
-  onComment: (content: string) => void
+  onComment: (content: string) => Promise<boolean> | boolean | void
   onUnavailable?: () => void
 }
 
 export function PostCommentForm({
   replyTarget,
   available = true,
+  isSubmitting = false,
+  error = "",
   onCancelReply,
   onComment,
   onUnavailable,
@@ -39,19 +44,23 @@ export function PostCommentForm({
     if (replyTarget) inputRef.current?.focus()
   }, [replyTarget])
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSubmitting) return
     if (!requireAuth()) return
     if (!available) {
       onUnavailable?.()
       return
     }
-    if (!comment.trim()) {
+    const trimmed = comment.trim()
+    if (!trimmed) {
       inputRef.current?.focus()
       return
     }
-    onComment(comment.trim())
-    setComment("")
+    const ok = await onComment(trimmed)
+    if (ok !== false) {
+      setComment("")
+    }
   }
 
   return (
@@ -59,7 +68,7 @@ export function PostCommentForm({
       aria-label={
         replyTarget ? `Responder a ${replyTarget.name}` : "Adicionar comentário"
       }
-      onSubmit={handleSubmit}
+      onSubmit={(event) => void handleSubmit(event)}
       className="shrink-0 border-t border-border bg-background p-4 sm:px-6"
     >
       <div className="flex items-start gap-3">
@@ -76,6 +85,7 @@ export function PostCommentForm({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
+                disabled={isSubmitting}
                 onClick={onCancelReply}
                 aria-label="Cancelar resposta"
                 className="shrink-0 text-muted-foreground"
@@ -104,7 +114,9 @@ export function PostCommentForm({
                 id={inputId}
                 name="comment"
                 rows={1}
+                maxLength={COMMENT_MAX_LENGTH}
                 value={comment}
+                disabled={isSubmitting}
                 required
                 placeholder={commentPlaceholder}
                 onChange={(event) => setComment(event.target.value)}
@@ -142,7 +154,7 @@ export function PostCommentForm({
             <Button
               type={canComment ? "submit" : "button"}
               size="icon"
-              disabled={canComment && !comment.trim()}
+              disabled={isSubmitting || (canComment && !comment.trim())}
               onClick={
                 canComment
                   ? undefined
@@ -152,19 +164,38 @@ export function PostCommentForm({
                     }
               }
               aria-label={
-                canComment
-                  ? replyTarget
-                    ? "Enviar resposta"
-                    : "Enviar comentário"
-                  : isAuthenticated
-                    ? "Comentários ainda indisponíveis"
-                    : "Entrar para adicionar comentário"
+                isSubmitting
+                  ? "Enviando comentário"
+                  : canComment
+                    ? replyTarget
+                      ? "Enviar resposta"
+                      : "Enviar comentário"
+                    : isAuthenticated
+                      ? "Comentários ainda indisponíveis"
+                      : "Entrar para adicionar comentário"
               }
               className="size-8 shrink-0 rounded-full"
             >
-              <ArrowUp aria-hidden="true" className="size-4" />
+              {isSubmitting ? (
+                <LoaderCircle
+                  aria-hidden="true"
+                  className="size-4 animate-spin motion-reduce:animate-none"
+                />
+              ) : (
+                <ArrowUp aria-hidden="true" className="size-4" />
+              )}
             </Button>
           </div>
+          {canComment && comment.length >= COMMENT_MAX_LENGTH - 200 && (
+            <p className="mt-1.5 text-right text-[11px] text-muted-foreground tabular-nums">
+              {comment.length}/{COMMENT_MAX_LENGTH}
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="mt-2 text-xs text-destructive">
+              {error}
+            </p>
+          )}
         </div>
       </div>
     </form>

@@ -24,6 +24,8 @@ export type FeedMediaData = {
   poster?: string
 }
 
+export type FeedCommentStatus = "publicado" | "excluido" | "oculto"
+
 export type FeedCommentData = {
   id: string
   author: FeedUserData
@@ -31,6 +33,12 @@ export type FeedCommentData = {
   content: string
   time: string
   replies: FeedCommentData[]
+  depth?: 0 | 1 | 2
+  parentId?: string | null
+  rootId?: string | null
+  status?: FeedCommentStatus
+  editedAt?: string | null
+  createdAt?: string
 }
 
 export type FeedPostData = {
