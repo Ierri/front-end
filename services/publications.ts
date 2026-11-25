@@ -1,7 +1,7 @@
 import { stackSchema } from "@/services/profiles"
 import { z } from "zod"
 
-import type { FeedPostData } from "@/lib/feed/types"
+import type { FeedPostData, FeedVisibility } from "@/lib/feed/types"
 import {
   ApiError,
   apiRequest,
@@ -93,6 +93,8 @@ export function toFeedPost(
       fictitious: false,
     },
     content: publication.conteudo,
+    visibility: publication.visibilidade,
+    editedAt: publication.editadaEm,
     technologies: [],
     stacks: publication.stacks,
     media: [...publication.midias]
@@ -195,5 +197,55 @@ export const publicationsService = {
       signal,
     })
     return toFeedPost(result.data)
+  },
+
+  async update(
+    id: string,
+    {
+      content,
+      visibility,
+      signal,
+    }: {
+      content?: string
+      visibility?: FeedVisibility
+      signal?: AbortSignal
+    }
+  ): Promise<FeedPostData> {
+    const publicationId = assertObjectId(id)
+    const body: { conteudo?: string; visibilidade?: FeedVisibility } = {}
+    if (content !== undefined) {
+      const trimmed = content.trim()
+      if (!trimmed) {
+        throw new ApiError(
+          "O conteúdo da publicação não pode ficar vazio.",
+          "VALIDATION_ERROR"
+        )
+      }
+      body.conteudo = trimmed
+    }
+    if (visibility !== undefined) {
+      body.visibilidade = visibility
+    }
+    if (!Object.keys(body).length) {
+      throw new ApiError("Nenhuma alteração informada.", "VALIDATION_ERROR")
+    }
+    const result = await apiRequest(
+      `/publicacoes/${publicationId}`,
+      publicationSchema,
+      {
+        method: "PATCH",
+        body,
+        signal,
+      }
+    )
+    return toFeedPost(result.data)
+  },
+
+  async remove(id: string, signal?: AbortSignal): Promise<void> {
+    const publicationId = assertObjectId(id)
+    await apiRequest(`/publicacoes/${publicationId}`, z.null(), {
+      method: "DELETE",
+      signal,
+    })
   },
 }
