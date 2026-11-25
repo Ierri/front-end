@@ -69,6 +69,7 @@ export async function apiRequest<T>(
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
     body?: unknown
     headers?: Record<string, string>
+    credentials?: RequestCredentials
     signal?: AbortSignal
     timeoutMs?: number
   } = {}
@@ -97,7 +98,7 @@ export async function apiRequest<T>(
       headers,
       body: requestBody,
       cache: "no-store",
-      credentials: "include",
+      credentials: options.credentials ?? "include",
       signal,
     })
   } catch {
