@@ -5,16 +5,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import type { ProfileStack } from "@/services/profiles"
 
-export function ProfileStackBadges({ stacks }: { stacks?: ProfileStack[] }) {
+export function ProfileStackBadges({
+  stacks,
+  className,
+}: {
+  stacks?: ProfileStack[]
+  className?: string
+}) {
   if (!stacks?.length) return null
 
   return (
     <TooltipProvider>
       <ul
         aria-label="Stacks e tecnologias"
-        className="mt-5 flex flex-wrap gap-1.5"
+        className={cn("mt-5 flex flex-wrap gap-1.5", className)}
       >
         {stacks.map((stack) => (
           <li key={stack.id}>

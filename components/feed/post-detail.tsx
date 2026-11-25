@@ -48,27 +48,36 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
         )}
       >
         <div className={cn("space-y-6 p-5 sm:p-6", modal && "shrink-0")}>
-          {authorHref ? (
-            <Link
-              href={authorHref}
-              aria-label={`Ver perfil de ${post.author.name}`}
-              className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-            >
+          <div
+            className={cn(
+              "flex items-start justify-between gap-2",
+              modal && "pr-7"
+            )}
+          >
+            {authorHref ? (
+              <Link
+                href={authorHref}
+                aria-label={`Ver perfil de ${post.author.name}`}
+                className="block min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                <FeedUserSummary
+                  user={post.author}
+                  technologies={post.technologies}
+                />
+              </Link>
+            ) : (
               <FeedUserSummary
                 user={post.author}
                 technologies={post.technologies}
               />
-            </Link>
-          ) : (
-            <FeedUserSummary
-              user={post.author}
-              technologies={post.technologies}
+            )}
+            <ProfileStackBadges
+              stacks={post.stacks}
+              className="mt-0 max-w-1/2 justify-end gap-0"
             />
-          )}
+          </div>
 
           <p className="text-sm leading-6 text-foreground">{post.content}</p>
-
-          <ProfileStackBadges stacks={post.stacks} />
 
           <PostActions
             postId={post.id}

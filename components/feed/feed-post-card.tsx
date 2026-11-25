@@ -14,7 +14,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
 
   return (
     <article className="rounded-2xl border border-border">
-      <header className="relative p-4">
+      <header className="relative flex items-start justify-between gap-2 p-4">
         <Link
           href={`/feed/post/${post.id}`}
           aria-hidden="true"
@@ -25,6 +25,10 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
           user={post.author}
           technologies={post.technologies}
           profileHref={authorHref ?? undefined}
+        />
+        <ProfileStackBadges
+          stacks={post.stacks}
+          className="relative z-10 mt-0 max-w-1/2 justify-end gap-0"
         />
       </header>
       <Link
@@ -60,9 +64,6 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
         ) : null}
       </Link>
 
-      <div className="px-4">
-        <ProfileStackBadges stacks={post.stacks} />
-      </div>
       <footer className="p-4">
         <PostActions
           postId={post.id}
