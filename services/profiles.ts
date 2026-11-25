@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { apiRequest } from "@/services/api"
 
-const stackSchema = z.object({
+export const stackSchema = z.object({
   id: z.string(),
   nome: z.string(),
   slug: z.string(),
@@ -46,6 +46,14 @@ const technologyPageSchema = z.object({
 })
 
 export const profilesService = {
+  async setFollowing(id: string, follow: boolean) {
+    return (await apiRequest(
+      `/usuarios/${encodeURIComponent(id)}/seguir`,
+      z.object({ estado: z.enum(["nenhuma", "pendente", "aceita"]) }),
+      { method: follow ? "PUT" : "DELETE" }
+    )).data
+  },
+
   async me() {
     return (await apiRequest("/usuarios/me", profileSchema)).data
   },

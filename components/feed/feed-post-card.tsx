@@ -1,3 +1,4 @@
+import { ProfileStackBadges } from "@/components/profile/profile-stack-badges"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -13,24 +14,18 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
 
   return (
     <article className="rounded-2xl border border-border">
-      <header className="p-4">
-        {authorHref ? (
-          <Link
-            href={authorHref}
-            aria-label={`Ver perfil de ${post.author.name}`}
-            className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-          >
-            <FeedUserSummary
-              user={post.author}
-              technologies={post.technologies}
-            />
-          </Link>
-        ) : (
-          <FeedUserSummary
-            user={post.author}
-            technologies={post.technologies}
-          />
-        )}
+      <header className="relative p-4">
+        <Link
+          href={`/feed/post/${post.id}`}
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 z-[1] rounded-t-2xl"
+        />
+        <FeedUserSummary
+          user={post.author}
+          technologies={post.technologies}
+          profileHref={authorHref ?? undefined}
+        />
       </header>
       <Link
         href={`/feed/post/${post.id}`}
@@ -65,6 +60,9 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
         ) : null}
       </Link>
 
+      <div className="px-4">
+        <ProfileStackBadges stacks={post.stacks} />
+      </div>
       <footer className="p-4">
         <PostActions
           postId={post.id}

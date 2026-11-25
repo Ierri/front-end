@@ -132,12 +132,10 @@ function CommentItem({
   const visibleReplyCount = countComments(comment.replies)
 
   const showLoadApiRepliesButton =
-    canHaveApiReplies && Boolean(onLoadReplies) && !repliesLoaded
-  const showEmptyRepliesLabel =
     canHaveApiReplies &&
     Boolean(onLoadReplies) &&
-    repliesLoaded &&
-    visibleReplyCount === 0
+    !repliesLoaded &&
+    (comment.hasReplies === true || visibleReplyCount > 0)
   const showToggleRepliesButton =
     visibleReplyCount > 0 && (!canHaveApiReplies || repliesLoaded)
 
@@ -507,12 +505,6 @@ function CommentItem({
                       : `Ver ${visibleReplyCount}`}{" "}
                   {visibleReplyCount === 1 ? "resposta" : "respostas"}
                 </button>
-              )}
-
-              {showEmptyRepliesLabel && (
-                <span className="text-xs text-muted-foreground">
-                  Sem respostas
-                </span>
               )}
             </div>
           )}

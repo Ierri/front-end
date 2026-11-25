@@ -8,6 +8,7 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type FeedRouteModalProps = {
+  onClose?: () => void
   title: string
   closeLabel: string
   popupClassName?: string
@@ -15,13 +16,14 @@ type FeedRouteModalProps = {
 }
 
 export function FeedRouteModal({
+  onClose,
   title,
   closeLabel,
   popupClassName,
   children,
 }: FeedRouteModalProps) {
   const router = useRouter()
-  const close = () => router.back()
+  const close = onClose ?? (() => router.back())
 
   return (
     <Dialog.Root

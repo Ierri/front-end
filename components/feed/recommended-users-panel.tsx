@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { CreatePostCard } from "@/components/feed/create-post-card"
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import { profileHref } from "@/lib/profile/routes"
 import { creatorsService, type RankedCreatorData } from "@/services/creators"
@@ -18,7 +19,7 @@ export async function RecommendedUsersPanel() {
   }
 
   return (
-    <aside className="sticky top-20 hidden h-[calc(100svh-5rem)] w-80 justify-self-start pt-6 pb-6 xl:block">
+    <aside className="sticky top-[calc(5rem+1px)] hidden max-h-[calc(100svh-5rem-1px)] w-80 self-start justify-self-start overflow-y-auto pt-6 pb-6 xl:block">
       <div className="space-y-4">
         <div>
           <h2 className="text-lg">Criadores em destaque</h2>
@@ -29,7 +30,7 @@ export async function RecommendedUsersPanel() {
 
         <section
           aria-label="Criadores em destaque"
-          className="rounded-xl border border-border"
+          className="overflow-hidden rounded-xl border border-border"
         >
           {creators.length ? (
             <ul className="divide-y divide-border/60">
@@ -82,6 +83,7 @@ export async function RecommendedUsersPanel() {
             </p>
           )}
         </section>
+        <CreatePostCard />
       </div>
     </aside>
   )

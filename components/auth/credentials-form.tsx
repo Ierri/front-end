@@ -101,7 +101,7 @@ export function CredentialsForm({
         <div className="flex min-w-0 items-center gap-3">
           {!isRegistering && (
             <Avatar className="size-10 shrink-0">
-              <AvatarFallback className="bg-primary font-heading text-sm font-bold text-primary-foreground">
+              <AvatarFallback className="bg-primary font-heading text-sm font-bold text-white dark:text-background">
                 {user?.initials}
               </AvatarFallback>
             </Avatar>

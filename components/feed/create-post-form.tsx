@@ -4,12 +4,11 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Globe2 } from "lucide-react"
 
-import { useAuth } from "@/components/auth/auth-provider"
 import {
   CreatePostMediaPicker,
   type SelectedPostMedia,
 } from "@/components/feed/create-post-media-picker"
-import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { CreatePostStacks } from "@/components/feed/create-post-stacks"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -20,6 +19,7 @@ import { publicationsService } from "@/services/publications"
 type CreatePostFormProps = {
   variant?: "page" | "modal"
   onExit?: () => void
+  onPublished?: () => void
 }
 
 let mediaIdSequence = 0
@@ -69,12 +69,13 @@ async function uploadMedia(
 export function CreatePostForm({
   variant = "page",
   onExit,
+  onPublished,
 }: CreatePostFormProps) {
   const router = useRouter()
-  const { user } = useAuth()
   const mediaTriggerRef = useRef<HTMLButtonElement>(null)
   const mediaRef = useRef<SelectedPostMedia[]>([])
   const requestRef = useRef<AbortController | null>(null)
+  const [stackIds, setStackIds] = useState<string[]>([])
   const [content, setContent] = useState("")
   const [media, setMedia] = useState<SelectedPostMedia[]>([])
   const [error, setError] = useState("")
@@ -203,10 +204,13 @@ export function CreatePostForm({
       const post = await publicationsService.create({
         content: trimmedContent,
         mediaReferences: references,
+        stackIds,
         signal: controller.signal,
       })
       clearMedia()
       setContent("")
+      setStackIds([])
+      onPublished?.()
       router.push(`/feed/post/${post.id}`)
       router.refresh()
     } catch (submitError) {
@@ -242,30 +246,9 @@ export function CreatePostForm({
     >
       <header className="shrink-0 border-b border-border px-5 py-5 sm:px-6">
         <h1 className="pr-12 text-lg font-semibold">Criar publicação</h1>
-        <p className="mt-1 pr-12 text-sm text-muted-foreground">
-          Mostre o que você está criando.
-        </p>
       </header>
 
       <section className="min-h-0 min-w-0 space-y-6 overflow-y-auto p-5 sm:p-6">
-        <div className="flex items-center gap-3">
-          <FeedUserAvatar
-            src={user?.avatarUrl}
-            name={user?.name ?? "Usuário"}
-            size="large"
-            fictitious={false}
-          />
-          <div className="min-w-0 space-y-1">
-            <p className="truncate text-sm font-semibold">
-              {user?.name ?? "Usuário"}
-            </p>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Globe2 aria-hidden="true" className="size-3.5" />
-              Publicação pública
-            </p>
-          </div>
-        </div>
-
         <div>
           <div className="mb-3">
             <Label
@@ -274,12 +257,6 @@ export function CreatePostForm({
             >
               Sobre o projeto
             </Label>
-            <p
-              id="post-content-help"
-              className="mt-1 text-xs leading-5 text-muted-foreground"
-            >
-              Uma boa descrição ajuda a comunidade a dar feedback.
-            </p>
           </div>
           <div className="rounded-xl border border-input bg-muted/40 p-4 transition-colors focus-within:border-ring focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
             <Textarea
@@ -289,12 +266,8 @@ export function CreatePostForm({
               value={content}
               disabled={isSubmitting}
               aria-invalid={Boolean(contentError)}
-              aria-describedby={
-                contentError
-                  ? "post-content-help post-content-error"
-                  : "post-content-help"
-              }
-              placeholder="O que você criou? Conte a ideia, os desafios ou em que gostaria de receber feedback."
+              aria-describedby={contentError ? "post-content-error" : undefined}
+              placeholder="Descreva o projeto e diga em que gostaria de receber feedback."
               onChange={(event) => {
                 setContent(event.target.value)
                 setContentError("")
@@ -311,14 +284,6 @@ export function CreatePostForm({
               {contentError}
             </p>
           )}
-          {content.length > 0 && (
-            <div className="mt-2 text-right text-xs leading-5 text-muted-foreground">
-              <span className="tabular-nums">
-                {content.length}{" "}
-                {content.length === 1 ? "caractere" : "caracteres"}
-              </span>
-            </div>
-          )}
         </div>
 
         <CreatePostMediaPicker
@@ -330,6 +295,11 @@ export function CreatePostForm({
           onFilesSelected={addFiles}
           onRemove={removeMedia}
           onSelectCover={selectCover}
+        />
+        <CreatePostStacks
+          selected={stackIds}
+          onChange={setStackIds}
+          disabled={isSubmitting}
         />
         {requestError && (
           <p
@@ -343,6 +313,10 @@ export function CreatePostForm({
       </section>
 
       <footer className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border bg-background px-5 py-4 sm:px-6">
+        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Globe2 aria-hidden="true" className="size-3.5" />
+          Publicação pública
+        </span>
         <div className="ml-auto flex items-center gap-2">
           <Button
             type="button"

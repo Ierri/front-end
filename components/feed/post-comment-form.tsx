@@ -77,7 +77,7 @@ export function PostCommentForm({
             <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
               <p className="min-w-0 truncate text-xs text-muted-foreground">
                 Respondendo a{" "}
-                <span className="font-medium text-accent-foreground">
+                <span className="font-medium text-primary">
                   {replyTarget.name}
                 </span>
               </p>

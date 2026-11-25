@@ -1,3 +1,5 @@
+import type { ProfileStack } from "@/services/profiles"
+
 export type TechnologyKey =
   | "web"
   | "typescript"
@@ -33,6 +35,7 @@ export type FeedCommentData = {
   content: string
   time: string
   replies: FeedCommentData[]
+  hasReplies?: boolean
   depth?: 0 | 1 | 2
   parentId?: string | null
   rootId?: string | null
@@ -42,6 +45,7 @@ export type FeedCommentData = {
 }
 
 export type FeedPostData = {
+  stacks?: ProfileStack[]
   id: string
   source?: "demo" | "api"
   author: FeedUserData

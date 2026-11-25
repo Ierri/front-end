@@ -16,6 +16,8 @@ export function FollowingPostsStrip({ posts }: { posts: FeedPostData[] }) {
     return true
   })
 
+  if (!authors.length) return null
+
   return (
     <section aria-label="Pessoas que você segue com publicações">
       {authors.length ? (
@@ -45,11 +47,7 @@ export function FollowingPostsStrip({ posts }: { posts: FeedPostData[] }) {
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Quando as pessoas que você segue publicarem, elas aparecerão aqui.
-        </p>
-      )}
+      ) : null}
     </section>
   )
 }

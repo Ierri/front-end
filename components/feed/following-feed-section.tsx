@@ -18,9 +18,11 @@ export function FollowingFeedSection() {
 
   return (
     <>
-      <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
-        <FollowingPostsStrip posts={posts} />
-      </div>
+      {posts.length > 0 && (
+        <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
+          <FollowingPostsStrip posts={posts} />
+        </div>
+      )}
       <InfiniteFeed
         key="following"
         initialPage={emptyFollowingPage}

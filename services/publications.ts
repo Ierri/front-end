@@ -1,3 +1,4 @@
+import { stackSchema } from "@/services/profiles"
 import { z } from "zod"
 
 import type { FeedPostData } from "@/lib/feed/types"
@@ -35,6 +36,7 @@ export const publicationSchema = z.object({
   slug: z.string(),
   autor: authorSchema,
   conteudo: z.string(),
+  stacks: z.array(stackSchema).optional(),
   midias: z.array(mediaSchema),
   visibilidade: z.enum(["publico", "seguidores"]),
   status: z.string(),
@@ -92,6 +94,7 @@ export function toFeedPost(
     },
     content: publication.conteudo,
     technologies: [],
+    stacks: publication.stacks,
     media: [...publication.midias]
       .sort((a, b) => a.ordem - b.ordem)
       .map((media, index) => ({
@@ -172,10 +175,12 @@ export const publicationsService = {
   async create({
     content,
     mediaReferences,
+    stackIds,
     signal,
   }: {
     content: string
     mediaReferences: string[]
+    stackIds?: string[]
     signal?: AbortSignal
   }): Promise<FeedPostData> {
     const result = await apiRequest("/publicacoes", publicationSchema, {
@@ -184,6 +189,7 @@ export const publicationsService = {
         conteudo: content,
         visibilidade: "publico",
         midias: mediaReferences,
+        ...(stackIds?.length ? { stackIds } : {}),
       },
       timeoutMs: 30_000,
       signal,
