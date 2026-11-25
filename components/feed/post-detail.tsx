@@ -23,7 +23,7 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
       className={cn(
         "min-h-0 bg-background md:grid md:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)] lg:grid-cols-[minmax(0,1.65fr)_minmax(22rem,0.85fr)]",
         modal
-          ? "h-full overflow-y-auto md:grid-rows-[minmax(0,1fr)] md:overflow-hidden"
+          ? "flex h-full flex-col overflow-y-auto md:grid-rows-[minmax(0,1fr)] md:overflow-hidden"
           : "overflow-hidden rounded-2xl border border-border"
       )}
     >
@@ -34,7 +34,7 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
         priority
         unoptimized={post.source === "api"}
         className={cn(
-          modal && "md:min-h-0 md:overflow-y-auto",
+          modal && "shrink-0 md:min-h-0 md:overflow-y-auto",
           modal &&
             post.media.length === 1 &&
             "md:flex md:flex-col md:[&>figure]:my-auto md:[&>figure]:shrink-0"
@@ -44,10 +44,10 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
       <div
         className={cn(
           "min-w-0",
-          modal && "md:flex md:min-h-0 md:flex-col md:overflow-hidden"
+          modal && "contents md:flex md:min-h-0 md:flex-col md:overflow-hidden"
         )}
       >
-        <div className={cn("space-y-6 p-5 sm:p-6", modal && "md:shrink-0")}>
+        <div className={cn("space-y-6 p-5 sm:p-6", modal && "shrink-0")}>
           {authorHref ? (
             <Link
               href={authorHref}

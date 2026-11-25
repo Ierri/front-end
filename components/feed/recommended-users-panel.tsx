@@ -6,7 +6,7 @@ import { profileHref } from "@/lib/profile/routes"
 import { creatorsService, type RankedCreatorData } from "@/services/creators"
 
 const rowClassName =
-  "flex items-center gap-3 p-4 first:rounded-t-xl last:rounded-b-xl"
+  "flex items-center gap-3 p-4"
 
 export async function RecommendedUsersPanel() {
   let creators: RankedCreatorData[] = []
