@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Bookmark, UserRound } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/components/auth/auth-provider"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Popover,
   PopoverContent,
@@ -15,9 +16,12 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+
 export function ProfileMenu() {
   const router = useRouter()
   const { user, logout: endSession } = useAuth()
+  const [open, setOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [error, setError] = useState("")
 
@@ -27,6 +31,7 @@ export function ProfileMenu() {
     setError("")
     try {
       await endSession()
+      setOpen(false)
       router.replace("/auth")
       router.refresh()
     } catch (error) {
@@ -40,7 +45,7 @@ export function ProfileMenu() {
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         aria-label="Abrir menu do perfil"
         className="flex cursor-pointer items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
@@ -84,14 +89,17 @@ export function ProfileMenu() {
         )}
         {user && (
           <div className="-mx-2 space-y-1">
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-auto w-full justify-start gap-3 px-2 py-2.5"
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "h-auto w-full justify-start gap-3 px-2 py-2.5"
+              )}
             >
               <UserRound aria-hidden="true" className="size-4" />
               Meu perfil
-            </Button>
+            </Link>
             <Button
               type="button"
               variant="ghost"
