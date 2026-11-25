@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
-import { CreatePostForm } from "@/components/feed/create-post-form"
+import { CreatePostModal } from "@/components/feed/create-post-modal"
+import FeedPage from "../../page"
 
 export const metadata: Metadata = {
   title: "Criar publicação",
@@ -11,9 +12,8 @@ export const metadata: Metadata = {
 export default function NewPostPage() {
   return (
     <ProtectedRoute returnTo="/feed/post/new">
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <CreatePostForm />
-      </main>
+      <FeedPage searchParams={Promise.resolve({})} />
+      <CreatePostModal direct />
     </ProtectedRoute>
   )
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Heart, MessageCircle } from "lucide-react"
@@ -5,7 +6,13 @@ import { Heart, MessageCircle } from "lucide-react"
 import { technologyCatalog } from "@/components/feed/technology-icon-list"
 import type { FeedPostData } from "@/lib/feed/types"
 
-export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
+export function ProfileProjectGrid({
+  posts,
+  emptyAction,
+}: {
+  posts: FeedPostData[]
+  emptyAction?: ReactNode
+}) {
   if (!posts.length) {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/40 px-5 py-12 text-center">
@@ -16,6 +23,7 @@ export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
           Quando novas publicações forem compartilhadas, elas aparecerão nesta
           galeria.
         </p>
+        {emptyAction && <div className="mt-5">{emptyAction}</div>}
       </div>
     )
   }

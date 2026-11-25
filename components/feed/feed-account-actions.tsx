@@ -1,11 +1,13 @@
 "use client"
 
 import Link from "next/link"
+import { LogIn } from "lucide-react"
 import { usePathname, useSearchParams } from "next/navigation"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { NotificationMenu } from "@/components/feed/notification-menu"
 import { ProfileMenu } from "@/components/feed/profile-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function FeedAccountActions() {
   const pathname = usePathname()
@@ -36,9 +38,14 @@ export function FeedAccountActions() {
   return (
     <Link
       href={`/auth?returnTo=${encodeURIComponent(returnTo)}`}
-      className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      aria-label="Entrar na sua conta"
+      className="inline-flex items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      Entrar
+      <Avatar className="size-10">
+        <AvatarFallback>
+          <LogIn aria-hidden="true" className="size-5" />
+        </AvatarFallback>
+      </Avatar>
     </Link>
   )
 }

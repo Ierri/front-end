@@ -1,11 +1,12 @@
-import Link from "next/link"
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import { PostModal } from "@/components/feed/post-modal"
+import type { FeedPostData } from "@/lib/feed/types"
+import { publicationsService } from "@/services/publications"
 
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
-import { profileHref } from "@/lib/profile/routes"
 import type { RankedCreatorData } from "@/services/creators"
-
-const cardClassName =
-  "group relative flex min-h-28 items-center overflow-hidden rounded-2xl border border-border bg-card p-4"
 
 export function TopPostsRanking({
   creators,
@@ -13,16 +14,116 @@ export function TopPostsRanking({
   creators: RankedCreatorData[]
 }) {
   const rankedCreators = creators.slice(0, 5)
+  const listRef = useRef<HTMLOListElement>(null)
+  const drag = useRef<{ id: number; x: number; left: number } | null>(null)
+  const moved = useRef(false)
+  const [dragging, setDragging] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+
+  const request = useRef<AbortController | null>(null)
+  const [post, setPost] = useState<FeedPostData | null>(null)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [error, setError] = useState("")
+
+  useEffect(() => () => request.current?.abort(), [])
+
+  async function openTopPost(creator: RankedCreatorData) {
+    request.current?.abort()
+    const controller = new AbortController()
+    request.current = controller
+    setLoadingId(creator.id)
+    setError("")
+    try {
+      const page = await publicationsService.list({
+        authorId: creator.id,
+        order: "score",
+        limit: 1,
+        signal: controller.signal,
+      })
+      if (controller.signal.aborted) return
+      if (page.items[0]) setPost(page.items[0])
+      else setError(`${creator.name} ainda não tem uma publicação disponível.`)
+    } catch {
+      if (!controller.signal.aborted)
+        setError("Não foi possível abrir a publicação. Tente novamente.")
+    } finally {
+      if (!controller.signal.aborted) setLoadingId(null)
+    }
+  }
+
+  function updateFade(list: HTMLOListElement) {
+    setHasMore(list.scrollWidth - list.clientWidth - list.scrollLeft > 1)
+  }
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const observer = new ResizeObserver(() => updateFade(list))
+    observer.observe(list)
+    updateFade(list)
+    return () => observer.disconnect()
+  }, [rankedCreators.length])
+
+  function stopDrag() {
+    drag.current = null
+    setDragging(false)
+  }
 
   return (
-    <section aria-label="Top 5 de criadores por pontuação">
+    <section className="relative" aria-label="Top 5 de criadores por pontuação">
       {rankedCreators.length ? (
-        <ol className="flex h-28 [scrollbar-width:none] items-center gap-3 overflow-x-auto px-1 [&::-webkit-scrollbar]:hidden">
-          {rankedCreators.map((creator, index) => {
-            const href = profileHref(creator.username)
-            const pointsLabel = `${creator.score} ${creator.score === 1 ? "ponto" : "pontos"}`
-            const content = (
-              <>
+        <ol
+          ref={listRef}
+          className={`flex h-28 [scrollbar-width:none] items-center gap-3 overflow-x-auto px-1 select-none [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing [&_button]:cursor-grabbing" : "cursor-grab"}`}
+          onScroll={(event) => updateFade(event.currentTarget)}
+          onDragStart={(event) => event.preventDefault()}
+          onPointerDown={(event) => {
+            moved.current = false
+            if (event.pointerType !== "mouse" || event.button !== 0) return
+            const list = event.currentTarget
+            if (list.scrollWidth <= list.clientWidth) return
+            drag.current = {
+              id: event.pointerId,
+              x: event.clientX,
+              left: list.scrollLeft,
+            }
+          }}
+          onPointerMove={(event) => {
+            const start = drag.current
+            if (!start || start.id !== event.pointerId) return
+            const distance = event.clientX - start.x
+            if (!moved.current && Math.abs(distance) < 5) return
+            const list = event.currentTarget
+            if (!moved.current) {
+              moved.current = true
+              list.setPointerCapture(event.pointerId)
+              setDragging(true)
+            }
+            list.scrollLeft = start.left - distance
+          }}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          onLostPointerCapture={stopDrag}
+          onPointerLeave={() => {
+            if (!moved.current) stopDrag()
+          }}
+          onClickCapture={(event) => {
+            if (!moved.current || event.detail === 0) return
+            event.preventDefault()
+            event.stopPropagation()
+            moved.current = false
+          }}
+        >
+          {rankedCreators.map((creator, index) => (
+            <li key={creator.id} className="min-w-56 flex-[1_0_14rem]">
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-busy={loadingId === creator.id}
+                onClick={() => void openTopPost(creator)}
+                aria-label={`${index + 1}º lugar: ${creator.name}. Abrir publicação mais votada.`}
+                className="group relative flex min-h-28 w-full items-center overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-colors duration-200 outline-none hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none"
+              >
                 <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3 pr-7">
                   <FeedUserAvatar
                     src={creator.avatar}
@@ -38,7 +139,9 @@ export function TopPostsRanking({
                       {creator.name}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-                      {pointsLabel}
+                      {loadingId === creator.id
+                        ? "Abrindo…"
+                        : `${creator.score} ${creator.score === 1 ? "ponto" : "pontos"}`}
                     </p>
                   </div>
                 </div>
@@ -48,32 +151,23 @@ export function TopPostsRanking({
                 >
                   {index + 1}
                 </span>
-              </>
-            )
-
-            return (
-              <li key={creator.id} className="min-w-56 flex-[1_0_14rem]">
-                {href ? (
-                  <Link
-                    href={href}
-                    aria-label={`${index + 1}º lugar: ${creator.name}, ${pointsLabel}. Ver perfil.`}
-                    className={`${cardClassName} transition-colors duration-200 outline-none hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none`}
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div className={cardClassName}>{content}</div>
-                )}
-              </li>
-            )
-          })}
+              </button>
+            </li>
+          ))}
         </ol>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          O ranking dos criadores aparecerá aqui conforme os projetos receberem
-          votos.
+      ) : null}
+      {hasMore && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 right-0 z-20 h-28 w-14 bg-linear-to-l from-background to-transparent"
+        />
+      )}
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          {error}
         </p>
       )}
+      {post && <PostModal post={post} onClose={() => setPost(null)} />}
     </section>
   )
 }

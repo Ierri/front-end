@@ -1,21 +1,20 @@
 import { FeedRouteModal } from "@/components/feed/feed-route-modal"
 import { PostDetail } from "@/components/feed/post-detail"
 import type { FeedPostData } from "@/lib/feed/types"
-import { cn } from "@/lib/utils"
 
-export function PostModal({ post }: { post: FeedPostData }) {
-  const hasSingleMedia = post.media.length === 1
-
+export function PostModal({
+  post,
+  onClose,
+}: {
+  post: FeedPostData
+  onClose?: () => void
+}) {
   return (
     <FeedRouteModal
+      onClose={onClose}
       title={`Publicação de ${post.author.name}`}
       closeLabel="Fechar publicação"
-      popupClassName={cn(
-        "overflow-hidden md:w-[min(96vw,92rem)]",
-        hasSingleMedia
-          ? "md:h-auto md:max-h-[min(92svh,58rem)]"
-          : "md:h-[min(92svh,58rem)]"
-      )}
+      popupClassName="overflow-hidden md:h-[min(90svh,58rem)] md:w-[min(96vw,92rem)]"
     >
       <PostDetail post={post} modal />
     </FeedRouteModal>

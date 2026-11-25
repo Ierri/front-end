@@ -7,8 +7,14 @@ const userSchema = z.object({
   name: z.string(),
   email: z.string(),
   username: z.string(),
-  bio: z.string().optional(),
-  avatarUrl: z.string().optional(),
+  bio: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? undefined),
+  avatarUrl: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? undefined),
   createdAt: z.string(),
 })
 const resultSchema = z.object({ user: userSchema })

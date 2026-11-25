@@ -249,7 +249,7 @@ export function PostActions({
             className={cn(
               "rounded-full transition-colors motion-reduce:transition-none",
               myVote === 1 &&
-                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
             )}
           >
             <ArrowBigUp className={cn(myVote === 1 && "fill-current")} />
@@ -258,7 +258,7 @@ export function PostActions({
             aria-label={`${displayedScore} votos`}
             className={cn(
               "min-w-10 text-center text-sm font-semibold tabular-nums",
-              myVote === 1 && "text-accent-foreground"
+              myVote === 1 && "text-accent-foreground dark:text-primary"
             )}
           >
             {displayedScore}
@@ -274,7 +274,7 @@ export function PostActions({
             className={cn(
               "rounded-full transition-colors motion-reduce:transition-none",
               myVote === -1 &&
-                "bg-muted text-foreground hover:bg-muted hover:text-foreground"
+                "bg-foreground text-background hover:bg-foreground/85 hover:text-background"
             )}
           >
             <ArrowBigDown className={cn(myVote === -1 && "fill-current")} />
@@ -284,7 +284,7 @@ export function PostActions({
         <Button
           type="button"
           variant="outline"
-          size="icon-lg"
+          size="icon-sm"
           disabled={isSaving}
           aria-pressed={isSaved}
           aria-label={isSaved ? "Remover dos salvos" : "Salvar publicação"}
@@ -292,7 +292,7 @@ export function PostActions({
           className={cn(
             "rounded-full transition-colors motion-reduce:transition-none",
             isSaved &&
-              "border-primary/40 bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+              "border-primary/40 bg-accent dark:border-primary text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
           )}
         >
           <Bookmark className={cn(isSaved && "fill-current")} />

@@ -4,6 +4,7 @@ import { useCallback, useEffect } from "react"
 import { LoaderCircle, RefreshCw } from "lucide-react"
 
 import { FeedPostCard } from "@/components/feed/feed-post-card"
+import { FeedEmptyState } from "@/components/feed/feed-empty-state"
 import { Button } from "@/components/ui/button"
 import type { FeedPostData } from "@/lib/feed/types"
 import { useCursorPagination } from "@/lib/feed/use-cursor-pagination"
@@ -33,8 +34,8 @@ export function InfiniteFeed({
   scope,
   order,
   loadOnMount = false,
-  emptyTitle = "Ainda não há publicações",
-  emptyDescription = "Seja a primeira pessoa a compartilhar um projeto por aqui.",
+  emptyTitle,
+  emptyDescription,
   onPostsChange,
 }: InfiniteFeedProps) {
   const fetchPage = useCallback(
@@ -78,12 +79,21 @@ export function InfiniteFeed({
       {posts.length ? (
         posts.map((post) => <FeedPostCard key={post.id} post={post} />)
       ) : !error && !isLoading && !isLoadingMore && !hasMore ? (
-        <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
-          <h2 className="text-lg">{emptyTitle}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {emptyDescription}
-          </p>
-        </div>
+        <FeedEmptyState
+          title={
+            emptyTitle ??
+            (authorId
+              ? "Os projetos ainda estão por vir."
+              : "Boas ideias merecem ser vistas.")
+          }
+          description={
+            emptyDescription ??
+            (authorId
+              ? "Este perfil ainda não compartilhou projetos. Enquanto isso, descubra o que a comunidade está criando."
+              : "O feed está esperando o primeiro projeto. Compartilhe uma interface e abra espaço para novas ideias e feedbacks.")
+          }
+          explore={Boolean(authorId || scope)}
+        />
       ) : null}
 
       {error && (

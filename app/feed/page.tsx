@@ -1,5 +1,4 @@
 import { ProtectedRoute } from "@/components/auth/protected-route"
-import { CreatePostCard } from "@/components/feed/create-post-card"
 import { FollowingFeedSection } from "@/components/feed/following-feed-section"
 import { InfiniteFeed } from "@/components/feed/infinite-feed"
 import { RecommendedUsersPanel } from "@/components/feed/recommended-users-panel"
@@ -65,20 +64,18 @@ export default async function FeedPage({
               ? "Feed das publicações mais votadas"
               : "Feed de publicações"
         }
-        className="min-h-[calc(100svh-11.25rem)] px-4 pt-6 pb-10 sm:px-6 md:min-h-[calc(100svh-5rem)] lg:px-8 xl:px-0"
+        className="px-4 pt-6 pb-10 sm:px-6 lg:px-8 xl:px-0"
       >
         <div className="mx-auto max-w-3xl space-y-6">
           {isFollowingTab ? (
             <FollowingFeedSection />
           ) : (
             <>
-              <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
-                {isTopTab ? (
+              {isTopTab && rankedCreators.length > 0 && (
+                <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
                   <TopPostsRanking creators={rankedCreators} />
-                ) : (
-                  <CreatePostCard />
-                )}
-              </div>
+                </div>
+              )}
               <InfiniteFeed
                 key={isTopTab ? "top" : (authorId ?? "all")}
                 initialPage={initialPage}

@@ -119,7 +119,7 @@ export function ProfileMenu() {
               onClick={handleNavigateClick}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                "h-auto w-full justify-start gap-3 px-2 py-2.5 hover:bg-foreground/10 dark:hover:bg-background",
                 isProfileActive && "bg-accent text-accent-foreground",
                 leaving && "pointer-events-none opacity-50"
               )}
@@ -135,7 +135,7 @@ export function ProfileMenu() {
               onClick={handleNavigateClick}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                "h-auto w-full justify-start gap-3 px-2 py-2.5 hover:bg-foreground/10 dark:hover:bg-background",
                 isSavedActive && "bg-accent text-accent-foreground",
                 leaving && "pointer-events-none opacity-50"
               )}
@@ -149,7 +149,7 @@ export function ProfileMenu() {
               variant="destructive"
               disabled={leaving}
               onClick={logout}
-              className="h-10 w-full justify-center gap-2 rounded-lg"
+              className="h-10 w-full justify-center gap-2 rounded-lg hover:bg-destructive/20 dark:hover:bg-background"
             >
               {leaving ? "Saindo…" : "Sair da conta"}
             </Button>

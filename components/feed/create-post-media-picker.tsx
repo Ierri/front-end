@@ -80,7 +80,7 @@ export function CreatePostMediaPicker({
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             {media.length
               ? "Escolha a capa que vai apresentar seu projeto no feed."
-              : "Adicione imagens ou vídeos do seu projeto."}
+              : "Até 10 imagens ou vídeos, com 25 MB por arquivo."}
           </p>
         </div>
 
