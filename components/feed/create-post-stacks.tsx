@@ -11,10 +11,12 @@ import { profilesService, type ProfileStack } from "@/services/profiles"
 export function CreatePostStacks({
   selected,
   onChange,
+  onOpenChange,
   disabled,
 }: {
   selected: string[]
   onChange: (ids: string[]) => void
+  onOpenChange: (open: boolean) => void
   disabled: boolean
 }) {
   const [catalog, setCatalog] = useState<ProfileStack[] | null>(null)
@@ -55,6 +57,7 @@ export function CreatePostStacks({
   return (
     <Dialog.Root
       onOpenChange={(open) => {
+        onOpenChange(open)
         if (open && !catalog) void load()
       }}
     >
@@ -69,7 +72,7 @@ export function CreatePostStacks({
         </span>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[110] bg-overlay backdrop-blur-sm" />
+        <Dialog.Backdrop className="fixed inset-0 z-[110] bg-overlay" />
         <Dialog.Viewport className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <Dialog.Popup className="flex max-h-[min(80dvh,36rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-border bg-background outline-none">
             <header className="shrink-0 space-y-3 border-b border-border p-4">

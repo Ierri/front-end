@@ -20,7 +20,7 @@ export function CreatePostModal({
       onClose={close}
       title="Criar publicação"
       closeLabel="Fechar criação de publicação"
-      popupClassName="overflow-hidden md:h-auto md:max-h-[86svh] md:w-[min(90vw,46rem)]"
+      popupClassName="overflow-hidden [&:has([data-stack-picker-open])]:[filter:blur(4px)_brightness(0.55)] md:h-auto md:max-h-[86svh] md:w-[min(90vw,46rem)]"
     >
       {(close) => (
         <CreatePostForm variant="modal" onExit={close} onPublished={onClose} />

@@ -75,6 +75,7 @@ export function CreatePostForm({
   const mediaTriggerRef = useRef<HTMLButtonElement>(null)
   const mediaRef = useRef<SelectedPostMedia[]>([])
   const requestRef = useRef<AbortController | null>(null)
+  const [stackPickerOpen, setStackPickerOpen] = useState(false)
   const [stackIds, setStackIds] = useState<string[]>([])
   const [content, setContent] = useState("")
   const [media, setMedia] = useState<SelectedPostMedia[]>([])
@@ -236,6 +237,12 @@ export function CreatePostForm({
       noValidate
       aria-label="Criar publicação"
       aria-busy={isSubmitting}
+      data-stack-picker-open={stackPickerOpen ? "" : undefined}
+      style={
+        variant === "page" && stackPickerOpen
+          ? { filter: "blur(4px) brightness(0.55)" }
+          : undefined
+      }
       onSubmit={handleSubmit}
       className={cn(
         "flex min-h-0 flex-col bg-background",
@@ -299,6 +306,7 @@ export function CreatePostForm({
         <CreatePostStacks
           selected={stackIds}
           onChange={setStackIds}
+          onOpenChange={setStackPickerOpen}
           disabled={isSubmitting}
         />
         {requestError && (
