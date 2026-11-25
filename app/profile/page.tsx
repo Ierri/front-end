@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { BriefcaseBusiness, Code2, Globe2, LoaderCircle, MapPin, PencilLine, Plus, RefreshCw, UserRound } from "lucide-react"
+import { Bookmark, BriefcaseBusiness, Code2, Globe2, LoaderCircle, MapPin, PencilLine, Plus, RefreshCw, UserRound } from "lucide-react"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { FeedHeader } from "@/components/feed/feed-header"
@@ -83,7 +83,7 @@ function ProfilePageContent() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div><p className="mb-1 text-sm font-medium text-accent-foreground">@{profile.username}</p><h1 className="text-3xl font-bold tracking-tight break-words sm:text-4xl">{profile.nome}</h1></div>
-                    <Link href="/profile/edit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted"><PencilLine className="size-4 text-accent-foreground" />Editar perfil</Link>
+                    <div className="flex flex-wrap items-center gap-2"><Link href="/profile/saved" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"><Bookmark aria-hidden="true" className="size-4 text-accent-foreground" />Salvos</Link><Link href="/profile/edit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"><PencilLine aria-hidden="true" className="size-4 text-accent-foreground" />Editar perfil</Link></div>
                   </div>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{profile.biografia || "Adicione uma biografia para apresentar seu trabalho."}</p>
                   <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted-foreground"><span className="inline-flex items-center gap-2"><Globe2 className="size-4" />Perfil {profile.visibilidadePerfil === "privado" ? "privado" : "público"}</span><span className="inline-flex items-center gap-2"><BriefcaseBusiness className="size-4" />{profile.stacks?.length ?? 0} tecnologias</span></div>

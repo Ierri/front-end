@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+import { PostBackButton } from "@/components/feed/post-back-button"
 import { PostDetail } from "@/components/feed/post-detail"
 import { getFeedPost } from "@/lib/feed/get-feed-post"
 
@@ -30,6 +31,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-[92rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <PostBackButton />
       <PostDetail post={post} />
     </main>
   )

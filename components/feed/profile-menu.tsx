@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState, type MouseEvent } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Bookmark, UserRound } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,10 +20,30 @@ import { cn } from "@/lib/utils"
 
 export function ProfileMenu() {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, logout: endSession } = useAuth()
   const [open, setOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [error, setError] = useState("")
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
+  const isProfileActive = pathname === "/profile"
+  const isSavedActive = pathname === "/profile/saved"
+
+  function handleNavigateClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (leaving) {
+      event.preventDefault()
+      return
+    }
+    setOpen(false)
+  }
 
   async function logout() {
     if (leaving) return
@@ -31,13 +51,15 @@ export function ProfileMenu() {
     setError("")
     try {
       await endSession()
+      if (!mountedRef.current) return
       setOpen(false)
       router.replace("/auth")
       router.refresh()
-    } catch (error) {
+    } catch (caught) {
+      if (!mountedRef.current) return
       setError(
-        error instanceof Error
-          ? error.message
+        caught instanceof Error
+          ? caught.message
           : "Não foi possível sair. Tente novamente."
       )
       setLeaving(false)
@@ -91,23 +113,36 @@ export function ProfileMenu() {
           <div className="-mx-2 space-y-1">
             <Link
               href="/profile"
-              onClick={() => setOpen(false)}
+              aria-current={isProfileActive ? "page" : undefined}
+              aria-disabled={leaving || undefined}
+              tabIndex={leaving ? -1 : undefined}
+              onClick={handleNavigateClick}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "h-auto w-full justify-start gap-3 px-2 py-2.5"
+                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                isProfileActive && "bg-accent text-accent-foreground",
+                leaving && "pointer-events-none opacity-50"
               )}
             >
               <UserRound aria-hidden="true" className="size-4" />
               Meu perfil
             </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-auto w-full justify-start gap-3 px-2 py-2.5"
+            <Link
+              href="/profile/saved"
+              aria-current={isSavedActive ? "page" : undefined}
+              aria-disabled={leaving || undefined}
+              tabIndex={leaving ? -1 : undefined}
+              onClick={handleNavigateClick}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                isSavedActive && "bg-accent text-accent-foreground",
+                leaving && "pointer-events-none opacity-50"
+              )}
             >
               <Bookmark aria-hidden="true" className="size-4" />
               Salvos
-            </Button>
+            </Link>
             <div className="mx-2 my-2 border-t border-border" />
             <Button
               type="button"

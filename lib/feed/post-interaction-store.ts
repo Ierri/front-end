@@ -35,6 +35,7 @@ let activeUserId: string | null = null
 const entries = new Map<string, PostInteractionEntry>()
 const listeners = new Set<Listener>()
 const inFlightKeys = new Set<string>()
+const inFlightSaveMutations = new Set<string>()
 const activeControllers = new Set<AbortController>()
 const hydrationQueue: HydrationTask[] = []
 let activeHydrations = 0
@@ -105,10 +106,31 @@ export function syncPostInteractionUser(userId: string | null) {
   activeControllers.clear()
   hydrationQueue.length = 0
   inFlightKeys.clear()
+  inFlightSaveMutations.clear()
   if (entries.size > 0) {
     entries.clear()
     emit()
   }
+}
+
+export function seedSavedPostInteractions(userId: string, postIds: string[]) {
+  if (!userId || !postIds.length) return
+  syncPostInteractionUser(userId)
+  let changed = false
+  for (const postId of postIds) {
+    if (inFlightSaveMutations.has(postId)) continue
+    const current = getEntry(postId)
+    if (current.saved !== true || !current.saveHydrated) {
+      entries.set(postId, {
+        ...current,
+        saved: true,
+        saveHydrated: true,
+        saveRevision: current.saveRevision + 1,
+      })
+      changed = true
+    }
+  }
+  if (changed) emit()
 }
 
 export function hydratePostInteractions(
@@ -126,7 +148,9 @@ export function hydratePostInteractions(
       key: voteKey,
       userId,
       async run(signal) {
-        const expectedRevision = getEntry(postId).voteRevision
+        const snapshot = getEntry(postId)
+        if (snapshot.voteHydrated) return
+        const expectedRevision = snapshot.voteRevision
         try {
           const vote = await votesService.get(postId, signal)
           if (signal.aborted || activeUserId !== userId) return
@@ -153,7 +177,9 @@ export function hydratePostInteractions(
       key: saveKey,
       userId,
       async run(signal) {
-        const expectedRevision = getEntry(postId).saveRevision
+        const snapshot = getEntry(postId)
+        if (snapshot.saveHydrated) return
+        const expectedRevision = snapshot.saveRevision
         try {
           const saved = await savesService.get(postId, signal)
           if (signal.aborted || activeUserId !== userId) return
@@ -235,6 +261,7 @@ export function beginSaveMutation(
   nextSaved: boolean
 ) {
   syncPostInteractionUser(userId)
+  inFlightSaveMutations.add(postId)
   const previous = getEntry(postId)
   const revision = previous.saveRevision + 1
   setEntry(postId, {
@@ -255,6 +282,7 @@ export function commitSaveMutation(
   if (activeUserId !== userId) return
   const latest = getEntry(postId)
   if (latest.saveRevision !== revision) return
+  inFlightSaveMutations.delete(postId)
   setEntry(postId, {
     ...latest,
     saved,
@@ -271,6 +299,7 @@ export function rollbackSaveMutation(
   if (activeUserId !== userId) return
   const latest = getEntry(postId)
   if (latest.saveRevision !== revision) return
+  inFlightSaveMutations.delete(postId)
   setEntry(postId, {
     ...latest,
     saved: previous.saved,
