@@ -103,6 +103,7 @@ export function toFeedPost(
         id: media.id,
         type: media.tipo === "imagem" ? "image" : "video",
         src: media.url,
+        sizeBytes: media.tamanhoBytes,
         alt:
           media.textoAlternativo ??
           `Mídia ${index + 1} da publicação de ${publication.autor.nome}`,
@@ -112,6 +113,8 @@ export function toFeedPost(
     commentCount: publication.contadores.comentarios,
   }
 }
+
+export type PublicationMediaEdit = { id: string } | { referencia: string }
 
 export const publicationsService = {
   async list({
@@ -204,15 +207,24 @@ export const publicationsService = {
     {
       content,
       visibility,
+      stackIds,
+      media,
       signal,
     }: {
       content?: string
       visibility?: FeedVisibility
+      stackIds?: string[]
+      media?: PublicationMediaEdit[]
       signal?: AbortSignal
     }
   ): Promise<FeedPostData> {
     const publicationId = assertObjectId(id)
-    const body: { conteudo?: string; visibilidade?: FeedVisibility } = {}
+    const body: {
+      conteudo?: string
+      visibilidade?: FeedVisibility
+      stackIds?: string[]
+      midias?: PublicationMediaEdit[]
+    } = {}
     if (content !== undefined) {
       const trimmed = content.trim()
       if (!trimmed) {
@@ -226,6 +238,8 @@ export const publicationsService = {
     if (visibility !== undefined) {
       body.visibilidade = visibility
     }
+    if (stackIds !== undefined) body.stackIds = stackIds
+    if (media !== undefined) body.midias = media
     if (!Object.keys(body).length) {
       throw new ApiError("Nenhuma alteração informada.", "VALIDATION_ERROR")
     }

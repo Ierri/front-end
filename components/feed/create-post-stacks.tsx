@@ -13,11 +13,13 @@ export function CreatePostStacks({
   onChange,
   onOpenChange,
   disabled,
+  elevated = false,
 }: {
   selected: string[]
   onChange: (ids: string[]) => void
   onOpenChange: (open: boolean) => void
   disabled: boolean
+  elevated?: boolean
 }) {
   const [catalog, setCatalog] = useState<ProfileStack[] | null>(null)
   const [loading, setLoading] = useState(false)
@@ -72,8 +74,12 @@ export function CreatePostStacks({
         </span>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[110] bg-overlay" />
-        <Dialog.Viewport className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <Dialog.Backdrop
+          className={`fixed inset-0 bg-overlay ${elevated ? "z-[130]" : "z-[110]"}`}
+        />
+        <Dialog.Viewport
+          className={`fixed inset-0 flex items-center justify-center p-4 ${elevated ? "z-[140]" : "z-[120]"}`}
+        >
           <Dialog.Popup className="flex max-h-[min(80dvh,36rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-border bg-background outline-none">
             <header className="shrink-0 space-y-3 border-b border-border p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">

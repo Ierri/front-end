@@ -47,7 +47,7 @@ function ProfileProjectTile({
               poster={cover.poster}
               aria-label={cover.alt}
               preload="metadata"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.025]"
+              className="size-full object-cover"
             />
           ) : cover ? (
             <Image
@@ -56,7 +56,7 @@ function ProfileProjectTile({
               fill
               unoptimized={isApiPost}
               sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.025]"
+              className="object-cover"
             />
           ) : null}
         </div>

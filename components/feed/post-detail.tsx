@@ -74,7 +74,7 @@ export function PostDetail({ post, modal = false, onClose }: PostDetailProps) {
           <div
             className={cn(
               "flex items-start justify-between gap-2",
-              modal && "pr-7"
+              modal && "md:pr-16"
             )}
           >
             {authorHref ? (
@@ -101,7 +101,11 @@ export function PostDetail({ post, modal = false, onClose }: PostDetailProps) {
                 stacks={currentPost.stacks}
                 className="mt-0 justify-end gap-0"
               />
-              <PostOwnerMenu post={currentPost} onDeleted={handleDeleted} />
+              <PostOwnerMenu
+                post={currentPost}
+                onDeleted={handleDeleted}
+                className={modal ? "absolute top-3 right-13 z-20" : undefined}
+              />
             </div>
           </div>
 

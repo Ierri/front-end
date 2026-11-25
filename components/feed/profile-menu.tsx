@@ -149,7 +149,7 @@ export function ProfileMenu() {
               variant="destructive"
               disabled={leaving}
               onClick={logout}
-              className="h-10 w-full justify-center gap-2 rounded-lg hover:bg-destructive/20 dark:hover:bg-background"
+              className="h-10 w-full justify-center gap-2 rounded-lg hover:bg-destructive/20 dark:hover:bg-destructive/30"
             >
               {leaving ? "Saindo…" : "Sair da conta"}
             </Button>

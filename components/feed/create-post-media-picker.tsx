@@ -21,7 +21,9 @@ import { cn } from "@/lib/utils"
 
 export type SelectedPostMedia = {
   id: string
-  file: File
+  file?: File
+  name: string
+  size: number
   kind: PostMediaKind
   previewUrl: string
 }
@@ -154,13 +156,13 @@ export function CreatePostMediaPicker({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.previewUrl}
-                        alt={`Prévia de ${item.file.name}`}
+                        alt={`Prévia de ${item.name}`}
                         className="size-full object-cover"
                       />
                     ) : (
                       <video
                         src={item.previewUrl}
-                        aria-label={`Prévia de ${item.file.name}`}
+                        aria-label={`Prévia de ${item.name}`}
                         muted
                         playsInline
                         className="size-full object-cover"
@@ -172,7 +174,7 @@ export function CreatePostMediaPicker({
                           render={<Button variant="outline" size="icon-sm" />}
                           type="button"
                           disabled={disabled}
-                          aria-label={`Definir ${item.file.name} como capa`}
+                          aria-label={`Definir ${item.name} como capa`}
                           onClick={() => onSelectCover(item.id)}
                           className="absolute bottom-2 left-2 rounded-full bg-background/60 shadow-sm backdrop-blur-md hover:bg-background/80 dark:bg-background/60 dark:hover:bg-background/80"
                         >
@@ -200,7 +202,7 @@ export function CreatePostMediaPicker({
                         render={<Button variant="outline" size="icon-sm" />}
                         type="button"
                         disabled={disabled}
-                        aria-label={`Remover ${item.file.name}`}
+                        aria-label={`Remover ${item.name}`}
                         onClick={() => onRemove(item.id)}
                         className="absolute right-2 bottom-2 rounded-full bg-background/60 shadow-sm backdrop-blur-md hover:bg-background/80 dark:bg-background/60 dark:hover:bg-background/80"
                       >
@@ -217,7 +219,7 @@ export function CreatePostMediaPicker({
 
         <p aria-live="polite" aria-atomic="true" className="sr-only">
           {media[0]
-            ? `Capa da publicação: ${media[0].file.name}`
+            ? `Capa da publicação: ${media[0].name}`
             : "Nenhuma mídia selecionada."}
         </p>
 

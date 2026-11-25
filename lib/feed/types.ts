@@ -24,6 +24,7 @@ export type FeedMediaData = {
   src: string
   alt: string
   poster?: string
+  sizeBytes?: number
 }
 
 export type FeedCommentStatus = "publicado" | "excluido" | "oculto"

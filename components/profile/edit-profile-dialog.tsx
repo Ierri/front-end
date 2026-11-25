@@ -355,13 +355,6 @@ export function EditProfileDialog({ onSaved }: EditProfileDialogProps) {
                             >
                               {avatarError}
                             </p>
-                          ) : avatarFile ? (
-                            <p
-                              role="status"
-                              className="truncate text-xs text-muted-foreground"
-                            >
-                              Nova foto: {avatarFile.name}
-                            </p>
                           ) : null}
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">

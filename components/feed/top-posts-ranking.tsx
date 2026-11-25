@@ -80,7 +80,7 @@ export function TopPostsRanking({
         <div className="relative w-full min-w-0">
           <ol
             ref={listRef}
-            className={`flex w-full snap-x snap-mandatory [scrollbar-width:none] items-stretch gap-3 overflow-x-auto overscroll-x-contain scroll-px-1 px-1 py-1 select-none [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing [&_button]:cursor-grabbing" : "cursor-grab"}`}
+            className={`flex w-full [scrollbar-width:none] items-stretch gap-3 overflow-x-auto overscroll-x-contain px-1 py-1 select-none [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing [&_button]:cursor-grabbing" : "cursor-grab"}`}
             onScroll={(event) => updateFade(event.currentTarget)}
             onDragStart={(event) => event.preventDefault()}
             onPointerDown={(event) => {
@@ -123,7 +123,7 @@ export function TopPostsRanking({
             {rankedCreators.map((creator, index) => (
               <li
                 key={creator.id}
-                className="w-56 max-w-[85%] shrink-0 snap-start sm:min-w-56 sm:flex-[1_0_14rem]"
+                className="w-56 max-w-[85%] shrink-0 sm:min-w-56 sm:flex-[1_0_14rem]"
               >
                 <button
                   type="button"
@@ -164,18 +164,14 @@ export function TopPostsRanking({
               </li>
             ))}
           </ol>
-          {hasScrolled && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-linear-to-r from-background to-transparent sm:w-14"
-            />
-          )}
-          {hasMore && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-linear-to-l from-background to-transparent sm:w-14"
-            />
-          )}
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-linear-to-r from-background to-transparent transition-opacity duration-300 ease-out motion-reduce:transition-none sm:w-14 ${hasScrolled ? "opacity-100" : "opacity-0"}`}
+          />
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-linear-to-l from-background to-transparent transition-opacity duration-300 ease-out motion-reduce:transition-none sm:w-14 ${hasMore ? "opacity-100" : "opacity-0"}`}
+          />
         </div>
       ) : null}
       {error && (

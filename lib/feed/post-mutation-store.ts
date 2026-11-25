@@ -8,6 +8,8 @@ export type PostEditPatch = {
   content: string
   visibility: FeedVisibility
   editedAt: string | null
+  stacks: FeedPostData["stacks"]
+  media: FeedPostData["media"]
 }
 
 export type PostMutationEntry = {
@@ -81,5 +83,7 @@ export function applyPostMutation(
     content: mutation.edited.content,
     visibility: mutation.edited.visibility,
     editedAt: mutation.edited.editedAt,
+    stacks: mutation.edited.stacks,
+    media: mutation.edited.media,
   }
 }
