@@ -1,6 +1,12 @@
 import { z } from "zod"
 
 const defaultApiUrl = "https://hml-api-ierri.eulucas.com.br"
+const objectIdPattern = /^[a-f\d]{24}$/i
+const authErrorCodes = new Set([
+  "AUTH_REQUIRED",
+  "TOKEN_REQUIRED",
+  "INVALID_TOKEN",
+])
 
 const failureSchema = z.object({
   success: z.literal(false),
@@ -19,6 +25,41 @@ export class ApiError extends Error {
   ) {
     super(message)
   }
+}
+
+export function isAuthApiError(error: unknown): boolean {
+  return error instanceof ApiError && authErrorCodes.has(error.code)
+}
+
+export function assertObjectId(value: string): string {
+  const normalized = value.trim()
+  if (!objectIdPattern.test(normalized)) {
+    throw new ApiError("Identificador inválido.", "VALIDATION_ERROR")
+  }
+  return normalized
+}
+
+export function assertLimit(limit: number): number {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+    throw new ApiError("Limite inválido.", "VALIDATION_ERROR")
+  }
+  return limit
+}
+
+export function safeAvatarUrl(url: string | null | undefined): string {
+  if (!url) return ""
+  const trimmed = url.trim()
+  if (!trimmed) return ""
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.href
+    }
+  } catch {
+    return ""
+  }
+  return ""
 }
 
 export async function apiRequest<T>(

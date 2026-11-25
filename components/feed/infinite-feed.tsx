@@ -5,27 +5,85 @@ import { LoaderCircle, RefreshCw } from "lucide-react"
 
 import { FeedPostCard } from "@/components/feed/feed-post-card"
 import { Button } from "@/components/ui/button"
-import { publicationsService, type FeedPageData } from "@/services/publications"
+import type { FeedPostData } from "@/lib/feed/types"
+import {
+  publicationsService,
+  type FeedOrder,
+  type FeedPageData,
+  type FeedScope,
+} from "@/services/publications"
 
 type InfiniteFeedProps = {
   initialPage: FeedPageData
   initialError?: string
   authorId?: string
+  scope?: FeedScope
+  order?: FeedOrder
+  loadOnMount?: boolean
+  emptyTitle?: string
+  emptyDescription?: string
+  onPostsChange?: (posts: FeedPostData[]) => void
 }
 
 export function InfiniteFeed({
   initialPage,
   initialError = "",
   authorId,
+  scope,
+  order,
+  loadOnMount = false,
+  emptyTitle = "Ainda não há publicações",
+  emptyDescription = "Seja a primeira pessoa a compartilhar um projeto por aqui.",
+  onPostsChange,
 }: InfiniteFeedProps) {
   const [posts, setPosts] = useState(initialPage.items)
   const [cursor, setCursor] = useState(initialPage.nextCursor)
   const [hasMore, setHasMore] = useState(initialPage.hasMore)
   const [error, setError] = useState(initialError)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(loadOnMount)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const requestRef = useRef<AbortController | null>(null)
-  const loadingRef = useRef(false)
+  const loadingRef = useRef(loadOnMount)
+
+  useEffect(() => {
+    onPostsChange?.(posts)
+  }, [onPostsChange, posts])
+
+  useEffect(() => {
+    if (!loadOnMount) return
+    const controller = new AbortController()
+    requestRef.current?.abort()
+    requestRef.current = controller
+    loadingRef.current = true
+
+    void publicationsService
+      .list({ authorId, scope, order, signal: controller.signal })
+      .then((page) => {
+        if (controller.signal.aborted) return
+        setPosts(page.items)
+        setCursor(page.nextCursor)
+        setHasMore(page.hasMore)
+        setError("")
+      })
+      .catch((requestError) => {
+        if (controller.signal.aborted) return
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Não foi possível carregar as publicações."
+        )
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          loadingRef.current = false
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      controller.abort()
+    }
+  }, [authorId, loadOnMount, order, scope])
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || (!hasMore && posts.length > 0)) return
@@ -41,6 +99,8 @@ export function InfiniteFeed({
       const page = await publicationsService.list({
         cursor,
         authorId,
+        scope,
+        order,
         signal: controller.signal,
       })
       setPosts((current) => {
@@ -65,11 +125,11 @@ export function InfiniteFeed({
         setIsLoading(false)
       }
     }
-  }, [authorId, cursor, hasMore, posts.length])
+  }, [authorId, cursor, hasMore, order, posts.length, scope])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
-    if (!sentinel || !hasMore || error) return
+    if (!sentinel || !hasMore || error || isLoading) return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) void loadMore()
@@ -78,7 +138,7 @@ export function InfiniteFeed({
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [error, hasMore, loadMore])
+  }, [error, hasMore, isLoading, loadMore])
 
   useEffect(() => () => requestRef.current?.abort(), [])
 
@@ -88,9 +148,9 @@ export function InfiniteFeed({
         posts.map((post) => <FeedPostCard key={post.id} post={post} />)
       ) : !error && !isLoading ? (
         <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
-          <h2 className="text-lg">Ainda não há publicações</h2>
+          <h2 className="text-lg">{emptyTitle}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Seja a primeira pessoa a compartilhar um projeto por aqui.
+            {emptyDescription}
           </p>
         </div>
       ) : null}
@@ -122,7 +182,10 @@ export function InfiniteFeed({
             role="status"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground"
           >
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+            <LoaderCircle
+              aria-hidden="true"
+              className="size-4 animate-spin motion-reduce:animate-none"
+            />
             Carregando publicações…
           </p>
         )}

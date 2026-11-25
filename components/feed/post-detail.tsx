@@ -53,9 +53,11 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
           <p className="text-sm leading-6 text-foreground">{post.content}</p>
 
           <PostActions
+            postId={post.id}
             score={post.score}
             authorName={post.author.name}
             source={post.source}
+            eager
           />
         </div>
 
