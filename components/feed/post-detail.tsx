@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { PostDiscussion } from "@/components/feed/post-discussion"
 import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
@@ -45,10 +47,23 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
         )}
       >
         <div className={cn("space-y-6 p-5 sm:p-6", modal && "md:shrink-0")}>
-          <FeedUserSummary
-            user={post.author}
-            technologies={post.technologies}
-          />
+          {post.source === "api" && post.author.username ? (
+            <Link
+              href={`/profile/${encodeURIComponent(post.author.username)}`}
+              aria-label={`Ver perfil de ${post.author.name}`}
+              className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              <FeedUserSummary
+                user={post.author}
+                technologies={post.technologies}
+              />
+            </Link>
+          ) : (
+            <FeedUserSummary
+              user={post.author}
+              technologies={post.technologies}
+            />
+          )}
 
           <p className="text-sm leading-6 text-foreground">{post.content}</p>
 

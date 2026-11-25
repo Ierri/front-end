@@ -10,18 +10,30 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
 
   return (
     <article className="rounded-2xl border border-border">
+      <header className="p-4">
+        {post.source === "api" && post.author.username ? (
+          <Link
+            href={`/profile/${encodeURIComponent(post.author.username)}`}
+            aria-label={`Ver perfil de ${post.author.name}`}
+            className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          >
+            <FeedUserSummary
+              user={post.author}
+              technologies={post.technologies}
+            />
+          </Link>
+        ) : (
+          <FeedUserSummary
+            user={post.author}
+            technologies={post.technologies}
+          />
+        )}
+      </header>
       <Link
         href={`/feed/post/${post.id}`}
         aria-label={`Abrir publicação de ${post.author.name}`}
         className="group block rounded-t-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
-        <header className="p-4">
-          <FeedUserSummary
-            user={post.author}
-            technologies={post.technologies}
-          />
-        </header>
-
         <p className="px-4 pb-4 text-sm leading-6 text-foreground">
           {post.content}
         </p>
