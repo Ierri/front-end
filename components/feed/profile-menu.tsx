@@ -100,14 +100,17 @@ export function ProfileMenu() {
               <UserRound aria-hidden="true" className="size-4" />
               Meu perfil
             </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-auto w-full justify-start gap-3 px-2 py-2.5"
+            <Link
+              href="/profile/saved"
+              onClick={() => setOpen(false)}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "h-auto w-full justify-start gap-3 px-2 py-2.5"
+              )}
             >
               <Bookmark aria-hidden="true" className="size-4" />
               Salvos
-            </Button>
+            </Link>
             <div className="mx-2 my-2 border-t border-border" />
             <Button
               type="button"

@@ -111,6 +111,24 @@ export function syncPostInteractionUser(userId: string | null) {
   }
 }
 
+export function seedSavedPostInteractions(userId: string, postIds: string[]) {
+  if (!userId || !postIds.length) return
+  syncPostInteractionUser(userId)
+  let changed = false
+  for (const postId of postIds) {
+    const current = getEntry(postId)
+    if (!current.saveHydrated && current.saveRevision === 0) {
+      entries.set(postId, {
+        ...current,
+        saved: true,
+        saveHydrated: true,
+      })
+      changed = true
+    }
+  }
+  if (changed) emit()
+}
+
 export function hydratePostInteractions(
   userId: string,
   postId: string,
