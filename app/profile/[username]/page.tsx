@@ -161,7 +161,7 @@ export default function PublicProfilePage() {
                   ) : (
                     <>
                       <p className="mt-2 max-w-2xl whitespace-pre-wrap text-sm leading-7 text-muted-foreground sm:text-base">{profile.biografia || "Este criador ainda não adicionou uma biografia."}</p>
-                      <ProfileStackBadges stacks={profile.stacks} />
+                      <ProfileStackBadges stacks={profile.stacks} sortByCategory />
                       <dl className="mt-7 flex flex-wrap gap-x-9 gap-y-4">{[{ label: "Projetos", value: profile.contadores?.publicacoes ?? projects.length }, { label: "Seguidores", value: profile.contadores?.seguidores ?? 0 }, { label: "Seguindo", value: profile.contadores?.seguindo ?? 0 }].map((stat) => <div key={stat.label} className="flex items-baseline gap-2"><dt className="text-sm text-muted-foreground">{stat.label}</dt><dd className="font-heading text-lg font-semibold tabular-nums">{stat.value}</dd></div>)}</dl>
                     </>
                   )}

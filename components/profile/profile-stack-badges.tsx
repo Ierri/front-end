@@ -8,14 +8,41 @@ import {
 import { cn } from "@/lib/utils"
 import type { ProfileStack } from "@/services/profiles"
 
+const categoryOrder = [
+  "Linguagem",
+  "Frontend",
+  "Backend",
+  "Mobile",
+  "Banco de dados",
+  "API",
+  "Design",
+  "Testes",
+  "Infraestrutura",
+  "Ferramenta",
+]
+
+function categoryPosition(category: string | null) {
+  const position = categoryOrder.indexOf(category?.trim() ?? "")
+  return position === -1 ? categoryOrder.length : position
+}
+
 export function ProfileStackBadges({
   stacks,
   className,
+  sortByCategory = false,
 }: {
   stacks?: ProfileStack[]
   className?: string
+  sortByCategory?: boolean
 }) {
   if (!stacks?.length) return null
+
+  const orderedStacks = sortByCategory
+    ? [...stacks].sort(
+        (left, right) =>
+          categoryPosition(left.categoria) - categoryPosition(right.categoria)
+      )
+    : stacks
 
   return (
     <TooltipProvider>
@@ -23,7 +50,7 @@ export function ProfileStackBadges({
         aria-label="Stacks e tecnologias"
         className={cn("mt-5 flex flex-wrap gap-1.5", className)}
       >
-        {stacks.map((stack) => (
+        {orderedStacks.map((stack) => (
           <li key={stack.id}>
             <Tooltip>
               <TooltipTrigger

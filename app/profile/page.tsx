@@ -98,7 +98,7 @@ function ProfilePageContent() {
                     </div>
                   </div>
                   <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{profile.biografia || "Adicione uma biografia para apresentar seu trabalho."}</p>
-                  <ProfileStackBadges stacks={profile.stacks} />
+                  <ProfileStackBadges stacks={profile.stacks} sortByCategory />
                   <dl className="mt-7 flex flex-wrap gap-x-9 gap-y-4">{stats.map((stat) => <div key={stat.label} className="flex items-baseline gap-2"><dt className="text-sm text-muted-foreground">{stat.label}</dt><dd className="font-heading text-lg font-semibold tabular-nums">{stat.value}</dd></div>)}</dl>
                 </div>
               </div>
