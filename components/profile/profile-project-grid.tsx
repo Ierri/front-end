@@ -4,7 +4,6 @@ import { Heart, MessageCircle } from "lucide-react"
 
 import { technologyCatalog } from "@/components/feed/technology-icon-list"
 import type { FeedPostData } from "@/lib/feed/types"
-import { getProfilePostTitle } from "@/lib/feed/mock-data"
 
 export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
   if (!posts.length) {
@@ -26,18 +25,13 @@ export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
       {posts.map((post) => {
         const cover = post.media[0]
         const isApiPost = post.source === "api"
-        const title = isApiPost ? null : getProfilePostTitle(post.id)
         const commentCount = post.commentCount ?? post.comments.length
 
         return (
           <li key={post.id} className="min-w-0">
             <Link
               href={`/feed/post/${post.id}`}
-              aria-label={
-                title
-                  ? `Abrir projeto ${title}`
-                  : `Abrir publicação de ${post.author.name}`
-              }
+              aria-label={`Abrir publicação de ${post.author.name}`}
               className="group block rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
@@ -63,20 +57,9 @@ export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
 
               <div className="flex items-start justify-between gap-3 pt-3">
                 <div className="min-w-0">
-                  {title ? (
-                    <>
-                      <h3 className="truncate text-base font-semibold transition-colors group-hover:text-accent-foreground">
-                        {title}
-                      </h3>
-                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                        {post.content}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="line-clamp-2 text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-accent-foreground">
-                      {post.content}
-                    </p>
-                  )}
+                  <p className="line-clamp-2 text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-accent-foreground">
+                    {post.content}
+                  </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3 pt-1 text-xs text-muted-foreground">
                   <span
@@ -98,11 +81,7 @@ export function ProfileProjectGrid({ posts }: { posts: FeedPostData[] }) {
 
               {post.technologies.length > 0 && (
                 <ul
-                  aria-label={
-                    title
-                      ? `Tecnologias de ${title}`
-                      : `Tecnologias da publicação de ${post.author.name}`
-                  }
+                  aria-label={`Tecnologias da publicação de ${post.author.name}`}
                   className="mt-3 flex flex-wrap gap-1.5"
                 >
                   {post.technologies.map((technology) => (

@@ -20,7 +20,16 @@ export function ProtectedRoute({
   useEffect(() => {
     if (status === "unauthenticated" || status === "error") {
       router.replace(`/auth?returnTo=${encodeURIComponent(destination)}`)
+      return
     }
+
+    if (status !== "loading") return
+
+    const timeout = window.setTimeout(() => {
+      router.replace(`/auth?returnTo=${encodeURIComponent(destination)}`)
+    }, 12_000)
+
+    return () => window.clearTimeout(timeout)
   }, [destination, router, status])
 
   if (status !== "authenticated") {
