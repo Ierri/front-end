@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
+import Link from "next/link"
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +18,7 @@ import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import type { FeedCommentData } from "@/lib/feed/types"
+import { profileHref } from "@/lib/profile/routes"
 import { cn } from "@/lib/utils"
 import { COMMENT_MAX_LENGTH } from "@/services/comments"
 
@@ -192,6 +194,11 @@ function CommentItem({
     }
   }
 
+  const authorHref =
+    comment.author.fictitious === false
+      ? profileHref(comment.author.username)
+      : null
+
   return (
     <li
       className={cn(
@@ -201,17 +208,41 @@ function CommentItem({
       )}
     >
       <article className="flex gap-3">
-        <FeedUserAvatar
-          src={comment.author.avatar}
-          name={comment.author.name}
-          size="small"
-          fictitious={comment.author.fictitious !== false}
-        />
+        {authorHref ? (
+          <Link
+            href={authorHref}
+            aria-label={`Ver perfil de ${comment.author.name}`}
+            className="shrink-0 self-start rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+          >
+            <FeedUserAvatar
+              src={comment.author.avatar}
+              name={comment.author.name}
+              size="small"
+              fictitious={false}
+            />
+          </Link>
+        ) : (
+          <FeedUserAvatar
+            src={comment.author.avatar}
+            name={comment.author.name}
+            size="small"
+            fictitious={comment.author.fictitious !== false}
+          />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <p className="text-sm leading-5 font-semibold">
-              {comment.author.name}
-            </p>
+            {authorHref ? (
+              <Link
+                href={authorHref}
+                className="rounded-sm text-sm leading-5 font-semibold outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              >
+                {comment.author.name}
+              </Link>
+            ) : (
+              <p className="text-sm leading-5 font-semibold">
+                {comment.author.name}
+              </p>
+            )}
             {isAuthor && (
               <span className="rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-medium text-accent-foreground">
                 Autor

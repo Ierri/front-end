@@ -5,6 +5,7 @@ import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
 import { PostMediaGallery } from "@/components/feed/post-media-gallery"
 import type { FeedPostData } from "@/lib/feed/types"
+import { profileHref } from "@/lib/profile/routes"
 import { cn } from "@/lib/utils"
 
 type PostDetailProps = {
@@ -14,6 +15,8 @@ type PostDetailProps = {
 
 export function PostDetail({ post, modal = false }: PostDetailProps) {
   const hasSingleMediaModal = modal && post.media.length === 1
+  const authorHref =
+    post.source === "api" ? profileHref(post.author.username) : null
 
   return (
     <article
@@ -47,9 +50,9 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
         )}
       >
         <div className={cn("space-y-6 p-5 sm:p-6", modal && "md:shrink-0")}>
-          {post.source === "api" && post.author.username ? (
+          {authorHref ? (
             <Link
-              href={`/profile/${encodeURIComponent(post.author.username)}`}
+              href={authorHref}
               aria-label={`Ver perfil de ${post.author.name}`}
               className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >

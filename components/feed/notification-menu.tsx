@@ -15,6 +15,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { profileHref } from "@/lib/profile/routes"
 import { cn } from "@/lib/utils"
 import { isAuthApiError } from "@/services/api"
 import {
@@ -45,6 +46,7 @@ export function NotificationMenu() {
   const markAllPendingRef = useRef(false)
   const markingIdsRef = useRef<Set<string>>(new Set())
   const pendingAuthPromptRef = useRef(false)
+  const selectionSeqRef = useRef(0)
 
   useEffect(() => {
     mountedRef.current = true
@@ -167,6 +169,7 @@ export function NotificationMenu() {
       void loadNotifications(null)
       void fetchUnreadCount()
     } else if (!nextOpen) {
+      selectionSeqRef.current += 1
       listRequestRef.current?.abort()
     }
   }
@@ -217,8 +220,10 @@ export function NotificationMenu() {
   }
 
   async function handleSelectNotification(notification: NotificationItemData) {
+    if (markingIdsRef.current.has(notification.id)) return
+    const seq = ++selectionSeqRef.current
     setActionError("")
-    if (notification.unread && !markingIdsRef.current.has(notification.id)) {
+    if (notification.unread) {
       markingIdsRef.current.add(notification.id)
       setItems((current) =>
         current.map((item) =>
@@ -250,9 +255,17 @@ export function NotificationMenu() {
       }
     }
 
+    if (!mountedRef.current || selectionSeqRef.current !== seq) return
+
     if (notification.publicationId) {
       setOpen(false)
       router.push(`/feed/post/${notification.publicationId}`)
+    } else {
+      const actorHref = profileHref(notification.actor.username)
+      if (actorHref) {
+        setOpen(false)
+        router.push(actorHref)
+      }
     }
   }
 
@@ -368,6 +381,9 @@ export function NotificationMenu() {
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm leading-5 font-medium">
+                        {notification.unread && (
+                          <span className="sr-only">Não lida. </span>
+                        )}
                         {notification.title}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
