@@ -4,15 +4,11 @@ import { ArrowLeft } from "lucide-react"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { FeedHeader } from "@/components/feed/feed-header"
-import { SavedPostsFeed } from "@/components/feed/saved-posts-feed"
-import { pageMetadata } from "@/lib/metadata"
+import { SavedPostsFeed } from "@/components/profile/saved-posts-feed"
 
 export const metadata: Metadata = {
-  ...pageMetadata({
-    path: "/profile/saved",
-    title: "Salvos | Ierri",
-    description: "Publicações que você salvou no Ierri.",
-  }),
+  title: "Salvos",
+  description: "Publicações que você salvou no Ierri.",
   robots: { index: false, follow: false },
 }
 
