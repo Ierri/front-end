@@ -1,51 +1,68 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { TechnologyIconList } from "@/components/feed/technology-icon-list"
-import { recommendedUsers } from "@/lib/feed/mock-data"
+import Link from "next/link"
 
-export function RecommendedUsersPanel() {
+import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { creatorsService, type RankedCreatorData } from "@/services/creators"
+
+export async function RecommendedUsersPanel() {
+  let creators: RankedCreatorData[] = []
+
+  try {
+    const page = await creatorsService.ranking({ limit: 5 })
+    creators = page.items
+  } catch {
+    creators = []
+  }
+
   return (
     <aside className="sticky top-20 hidden h-[calc(100svh-5rem)] w-80 justify-self-start pt-6 pb-6 xl:block">
       <div className="space-y-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg">Recomendados</h2>
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-              Demonstração
-            </span>
-          </div>
+          <h2 className="text-lg">Criadores em destaque</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Talvez você goste
+            Perfis mais votados da comunidade
           </p>
         </div>
 
-        <section className="rounded-xl border border-border">
-          <ul>
-            {recommendedUsers.map((user) => (
-              <li key={user.name} className="p-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-9" aria-label={user.name}>
-                    <AvatarFallback>
-                      {user.name
-                        .split(" ")
-                        .map((part) => part[0])
-                        .slice(0, 2)
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">
-                      {user.name}
-                    </p>
-                    <TechnologyIconList
-                      technologies={user.technologies}
-                      ownerName={user.name}
-                      className="mt-2"
+        <section
+          aria-label="Criadores em destaque"
+          className="rounded-xl border border-border"
+        >
+          {creators.length ? (
+            <ul className="divide-y divide-border/60">
+              {creators.map((creator) => (
+                <li key={creator.id}>
+                  <Link
+                    href={`/feed?autorId=${creator.id}`}
+                    aria-label={`Ver publicações de ${creator.name}`}
+                    className="flex items-center gap-3 p-4 transition-colors outline-none first:rounded-t-xl last:rounded-b-xl hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none"
+                  >
+                    <FeedUserAvatar
+                      src={creator.avatar}
+                      name={creator.name}
+                      size="default"
+                      fictitious={false}
                     />
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">
+                        {creator.name}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        @{creator.username}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums">
+                      {creator.score} {creator.score === 1 ? "pt" : "pts"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="p-4 text-xs leading-5 text-muted-foreground">
+              Os criadores em destaque aparecerão aqui conforme a comunidade
+              publicar e votar.
+            </p>
+          )}
         </section>
       </div>
     </aside>
