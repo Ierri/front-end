@@ -10,7 +10,7 @@ export function FeedHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background">
       <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 md:px-8">
-        <div className="grid min-h-20 grid-cols-2 items-center gap-x-3 gap-y-3 py-3 md:grid-cols-[auto_auto_minmax(18rem,1fr)_auto] md:py-0">
+        <div className="grid min-h-20 grid-cols-2 items-center gap-x-3 gap-y-3 pt-3 md:grid-cols-[auto_auto_minmax(18rem,1fr)_auto] md:pt-0">
           <Link
             href="/feed"
             aria-label="Ierri — voltar ao feed"

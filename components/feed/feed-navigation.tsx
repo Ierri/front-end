@@ -39,13 +39,13 @@ export function FeedNavigation() {
         <TabsList
           variant="line"
           aria-label="Filtrar publicações"
-          className="min-w-max gap-6 p-0 group-data-horizontal/tabs:h-auto"
+          className="flex w-fit min-w-max gap-6 p-0 group-data-horizontal/tabs:h-auto"
         >
           {visibleItems.map((item) => (
             <TabsTrigger
               key={item.value}
               value={item.value}
-              className="h-12 flex-none rounded-none px-0 text-sm font-semibold transition-colors after:bg-primary after:transition-none group-data-horizontal/tabs:after:bottom-0 md:h-20"
+              className="h-12 flex-none rounded-none px-0 text-sm font-semibold transition-colors after:bg-primary after:transition-none group-data-horizontal/tabs:after:-bottom-px md:h-20 md:group-data-horizontal/tabs:after:bottom-0"
             >
               {item.label}
             </TabsTrigger>

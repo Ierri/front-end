@@ -669,7 +669,7 @@ export function FeedSearchPopover() {
         ref={anchorRef}
         role="search"
         onSubmit={handleSubmit}
-        className="relative col-span-2 row-start-2 w-full md:col-span-1 md:col-start-3 md:row-start-1 md:max-w-lg md:justify-self-end"
+        className="relative col-span-2 row-start-2 w-full justify-self-center md:col-span-1 md:col-start-3 md:row-start-1 md:max-w-lg md:justify-self-end"
       >
         <label htmlFor="feed-search" className="sr-only">
           Buscar projetos e criadores
