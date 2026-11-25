@@ -253,6 +253,9 @@ export function NotificationMenu() {
     if (notification.publicationId) {
       setOpen(false)
       router.push(`/feed/post/${notification.publicationId}`)
+    } else if (notification.actor.username) {
+      setOpen(false)
+      router.push(`/profile/${encodeURIComponent(notification.actor.username)}`)
     }
   }
 

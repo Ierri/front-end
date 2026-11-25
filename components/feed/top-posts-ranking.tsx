@@ -17,8 +17,8 @@ export function TopPostsRanking({
           {rankedCreators.map((creator, index) => (
             <li key={creator.id} className="min-w-56 flex-[1_0_14rem]">
               <Link
-                href={`/feed?autorId=${creator.id}`}
-                aria-label={`${index + 1}º lugar: ${creator.name}. Ver publicações.`}
+                href={`/profile/${encodeURIComponent(creator.username)}`}
+                aria-label={`${index + 1}º lugar: ${creator.name}. Ver perfil.`}
                 className="group relative flex min-h-28 items-center overflow-hidden rounded-2xl border border-border bg-card p-4 transition-colors duration-200 outline-none hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none"
               >
                 <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3 pr-7">

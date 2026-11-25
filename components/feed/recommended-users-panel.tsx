@@ -32,8 +32,8 @@ export async function RecommendedUsersPanel() {
               {creators.map((creator) => (
                 <li key={creator.id}>
                   <Link
-                    href={`/feed?autorId=${creator.id}`}
-                    aria-label={`Ver publicações de ${creator.name}`}
+                    href={`/profile/${encodeURIComponent(creator.username)}`}
+                    aria-label={`Ver perfil de ${creator.name}`}
                     className="flex items-center gap-3 p-4 transition-colors outline-none first:rounded-t-xl last:rounded-b-xl hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none"
                   >
                     <FeedUserAvatar
