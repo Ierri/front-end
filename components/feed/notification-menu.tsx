@@ -15,6 +15,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { profileHref } from "@/lib/profile/routes"
 import { cn } from "@/lib/utils"
 import { isAuthApiError } from "@/services/api"
@@ -273,22 +274,31 @@ export function NotificationMenu() {
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger
-        aria-label={
-          unreadCount > 0
-            ? `Abrir notificações (${unreadCount} não lidas)`
-            : "Abrir notificações"
-        }
-        className="relative flex size-10 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Bell aria-hidden="true" className="size-5" />
-        {unreadCount > 0 && (
-          <span
-            aria-hidden="true"
-            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background"
-          />
-        )}
-      </PopoverTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              aria-label={
+                unreadCount > 0
+                  ? `Abrir notificações (${unreadCount} não lidas)`
+                  : "Abrir notificações"
+              }
+              className="relative flex size-10 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          }
+        >
+          <Bell aria-hidden="true" className="size-5" />
+          {unreadCount > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background"
+            />
+          )}
+        </TooltipTrigger>
+        <TooltipContent side="bottom" sideOffset={8}>
+          Notificações
+        </TooltipContent>
+      </Tooltip>
 
       <PopoverContent
         align="end"
@@ -366,13 +376,6 @@ export function NotificationMenu() {
                       notification.unread && "bg-accent/60 hover:bg-accent/80"
                     )}
                   >
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "mt-2 size-2 shrink-0 rounded-full",
-                        notification.unread ? "bg-primary" : "bg-transparent"
-                      )}
-                    />
                     <FeedUserAvatar
                       src={notification.actor.avatar}
                       name={notification.actor.name}
@@ -390,6 +393,12 @@ export function NotificationMenu() {
                         {notification.time}
                       </p>
                     </div>
+                    {notification.unread && (
+                      <span
+                        aria-hidden="true"
+                        className="mt-2 size-2 shrink-0 rounded-full bg-primary"
+                      />
+                    )}
                   </button>
                 </li>
               ))}

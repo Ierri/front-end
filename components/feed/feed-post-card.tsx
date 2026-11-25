@@ -7,7 +7,13 @@ import { PostActions } from "@/components/feed/post-actions"
 import type { FeedPostData } from "@/lib/feed/types"
 import { profileHref } from "@/lib/profile/routes"
 
-export function FeedPostCard({ post }: { post: FeedPostData }) {
+export function FeedPostCard({
+  post,
+  prioritizeCover = false,
+}: {
+  post: FeedPostData
+  prioritizeCover?: boolean
+}) {
   const cover = post.media[0]
   const authorHref =
     post.source === "api" ? profileHref(post.author.username) : null
@@ -24,6 +30,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
         <FeedUserSummary
           user={post.author}
           technologies={post.technologies}
+          showUsername
           profileHref={authorHref ?? undefined}
         />
         <ProfileStackBadges
@@ -48,6 +55,8 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
                 alt={cover.alt}
                 fill
                 unoptimized={post.source === "api"}
+                loading={prioritizeCover ? "eager" : "lazy"}
+                fetchPriority={prioritizeCover ? "high" : undefined}
                 sizes="(max-width: 1024px) calc(100vw - 2rem), (max-width: 1280px) calc(100vw - 9rem), 48rem"
                 className="object-cover"
               />

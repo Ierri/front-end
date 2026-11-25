@@ -5,6 +5,7 @@ import Link from "next/link"
 import { FeedNavigation } from "@/components/feed/feed-navigation"
 import { FeedAccountActions } from "@/components/feed/feed-account-actions"
 import { FeedSearchPopover } from "@/components/feed/feed-search-popover"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 export function FeedHeader() {
   return (
@@ -43,13 +44,15 @@ export function FeedHeader() {
           <FeedSearchPopover />
 
           <div className="flex items-center gap-3 justify-self-end md:col-start-4 md:row-start-1">
-            <Suspense
-              fallback={
-                <span className="size-10 rounded-full bg-muted" aria-hidden />
-              }
-            >
-              <FeedAccountActions />
-            </Suspense>
+            <TooltipProvider delay={350}>
+              <Suspense
+                fallback={
+                  <span className="size-10 rounded-full bg-muted" aria-hidden />
+                }
+              >
+                <FeedAccountActions />
+              </Suspense>
+            </TooltipProvider>
           </div>
         </div>
       </div>

@@ -63,12 +63,14 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
                 <FeedUserSummary
                   user={post.author}
                   technologies={post.technologies}
+                  showUsername
                 />
               </Link>
             ) : (
               <FeedUserSummary
                 user={post.author}
                 technologies={post.technologies}
+                showUsername
               />
             )}
             <ProfileStackBadges

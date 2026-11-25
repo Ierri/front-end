@@ -359,7 +359,7 @@ function CommentItem({
                     onReply(comment)
                   }}
                   className={cn(
-                    "inline-flex min-h-6 cursor-pointer items-center gap-1.5 rounded-sm text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-accent-foreground focus-visible:text-accent-foreground",
+                    "inline-flex min-h-6 cursor-pointer items-center gap-1.5 rounded-sm text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-primary focus-visible:text-accent-foreground",
                     actionButtonFocusClass,
                     activeReplyId === comment.id && "text-accent-foreground"
                   )}
@@ -621,18 +621,24 @@ export function CommentThread({
   const count = totalCount ?? countComments(comments)
 
   return (
-    <section aria-labelledby="post-comments-title">
-      <header className="mb-6 flex items-center justify-between gap-3">
-        <h2
-          id="post-comments-title"
-          className="flex items-center gap-2 text-base"
-        >
-          Conversa
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-md bg-muted px-1.5 font-sans text-[11px] font-medium text-muted-foreground tabular-nums">
-            {count}
-          </span>
-        </h2>
-      </header>
+    <section
+      aria-label={count === 0 ? "Comentários" : undefined}
+      aria-labelledby={count > 0 ? "post-comments-title" : undefined}
+      className="flex min-h-full flex-col"
+    >
+      {count > 0 && (
+        <header className="mb-6 flex items-center justify-between gap-3">
+          <h2
+            id="post-comments-title"
+            className="flex items-center gap-2 text-base"
+          >
+            Conversa
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-md bg-muted px-1.5 font-sans text-[11px] font-medium text-muted-foreground tabular-nums">
+              {count}
+            </span>
+          </h2>
+        </header>
+      )}
 
       {isLoading && comments.length === 0 ? (
         <div
@@ -720,10 +726,10 @@ export function CommentThread({
           )}
         </div>
       ) : (
-        <div className="py-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
           <MessageSquare
             aria-hidden="true"
-            className="mx-auto mb-3 size-6 text-muted-foreground"
+            className="mb-3 size-6 text-muted-foreground"
           />
           <p className="text-sm font-medium">
             {unavailable

@@ -18,6 +18,7 @@ export function TopPostsRanking({
   const drag = useRef<{ id: number; x: number; left: number } | null>(null)
   const moved = useRef(false)
   const [dragging, setDragging] = useState(false)
+  const [hasScrolled, setHasScrolled] = useState(false)
   const [hasMore, setHasMore] = useState(false)
 
   const request = useRef<AbortController | null>(null)
@@ -52,6 +53,7 @@ export function TopPostsRanking({
   }
 
   function updateFade(list: HTMLOListElement) {
+    setHasScrolled(list.scrollLeft > 1)
     setHasMore(list.scrollWidth - list.clientWidth - list.scrollLeft > 1)
   }
 
@@ -78,7 +80,7 @@ export function TopPostsRanking({
         <div className="relative w-full min-w-0">
           <ol
             ref={listRef}
-            className={`flex w-full snap-x snap-mandatory [scrollbar-width:none] items-stretch gap-3 overflow-x-auto overscroll-x-contain px-1 py-1 select-none [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing [&_button]:cursor-grabbing" : "cursor-grab"}`}
+            className={`flex w-full snap-x snap-mandatory [scrollbar-width:none] items-stretch gap-3 overflow-x-auto overscroll-x-contain scroll-px-1 px-1 py-1 select-none [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing [&_button]:cursor-grabbing" : "cursor-grab"}`}
             onScroll={(event) => updateFade(event.currentTarget)}
             onDragStart={(event) => event.preventDefault()}
             onPointerDown={(event) => {
@@ -162,6 +164,12 @@ export function TopPostsRanking({
               </li>
             ))}
           </ol>
+          {hasScrolled && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-linear-to-r from-background to-transparent sm:w-14"
+            />
+          )}
           {hasMore && (
             <div
               aria-hidden="true"

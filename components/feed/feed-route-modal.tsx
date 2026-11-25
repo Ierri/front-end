@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 type FeedRouteModalProps = {
   onClose?: () => void
+  closeHref?: string
   title: string
   closeLabel: string
   popupClassName?: string
@@ -17,13 +18,17 @@ type FeedRouteModalProps = {
 
 export function FeedRouteModal({
   onClose,
+  closeHref,
   title,
   closeLabel,
   popupClassName,
   children,
 }: FeedRouteModalProps) {
   const router = useRouter()
-  const close = onClose ?? (() => router.back())
+  const close = onClose ?? (() => {
+    if (closeHref) router.replace(closeHref)
+    else router.back()
+  })
 
   return (
     <Dialog.Root
