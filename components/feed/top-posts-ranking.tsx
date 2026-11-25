@@ -1,7 +1,11 @@
 import Link from "next/link"
 
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { profileHref } from "@/lib/profile/routes"
 import type { RankedCreatorData } from "@/services/creators"
+
+const cardClassName =
+  "group relative flex min-h-28 items-center overflow-hidden rounded-2xl border border-border bg-card p-4"
 
 export function TopPostsRanking({
   creators,
@@ -14,13 +18,11 @@ export function TopPostsRanking({
     <section aria-label="Top 5 de criadores por pontuação">
       {rankedCreators.length ? (
         <ol className="flex h-28 [scrollbar-width:none] items-center gap-3 overflow-x-auto px-1 [&::-webkit-scrollbar]:hidden">
-          {rankedCreators.map((creator, index) => (
-            <li key={creator.id} className="min-w-56 flex-[1_0_14rem]">
-              <Link
-                href={`/profile/${encodeURIComponent(creator.username)}`}
-                aria-label={`${index + 1}º lugar: ${creator.name}. Ver perfil.`}
-                className="group relative flex min-h-28 items-center overflow-hidden rounded-2xl border border-border bg-card p-4 transition-colors duration-200 outline-none hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none"
-              >
+          {rankedCreators.map((creator, index) => {
+            const href = profileHref(creator.username)
+            const pointsLabel = `${creator.score} ${creator.score === 1 ? "ponto" : "pontos"}`
+            const content = (
+              <>
                 <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3 pr-7">
                   <FeedUserAvatar
                     src={creator.avatar}
@@ -36,7 +38,7 @@ export function TopPostsRanking({
                       {creator.name}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-                      {creator.score} {creator.score === 1 ? "ponto" : "pontos"}
+                      {pointsLabel}
                     </p>
                   </div>
                 </div>
@@ -46,9 +48,25 @@ export function TopPostsRanking({
                 >
                   {index + 1}
                 </span>
-              </Link>
-            </li>
-          ))}
+              </>
+            )
+
+            return (
+              <li key={creator.id} className="min-w-56 flex-[1_0_14rem]">
+                {href ? (
+                  <Link
+                    href={href}
+                    aria-label={`${index + 1}º lugar: ${creator.name}, ${pointsLabel}. Ver perfil.`}
+                    className={`${cardClassName} transition-colors duration-200 outline-none hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none`}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div className={cardClassName}>{content}</div>
+                )}
+              </li>
+            )
+          })}
         </ol>
       ) : (
         <p className="text-sm text-muted-foreground">

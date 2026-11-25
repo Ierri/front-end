@@ -1,7 +1,11 @@
 import Link from "next/link"
 
 import { FeedUserAvatar } from "@/components/feed/feed-user-avatar"
+import { profileHref } from "@/lib/profile/routes"
 import { creatorsService, type RankedCreatorData } from "@/services/creators"
+
+const rowClassName =
+  "flex items-center gap-3 p-4 first:rounded-t-xl last:rounded-b-xl"
 
 export async function RecommendedUsersPanel() {
   let creators: RankedCreatorData[] = []
@@ -29,13 +33,11 @@ export async function RecommendedUsersPanel() {
         >
           {creators.length ? (
             <ul className="divide-y divide-border/60">
-              {creators.map((creator) => (
-                <li key={creator.id}>
-                  <Link
-                    href={`/profile/${encodeURIComponent(creator.username)}`}
-                    aria-label={`Ver perfil de ${creator.name}`}
-                    className="flex items-center gap-3 p-4 transition-colors outline-none first:rounded-t-xl last:rounded-b-xl hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none"
-                  >
+              {creators.map((creator) => {
+                const href = profileHref(creator.username)
+                const pointsText = `${creator.score} ${creator.score === 1 ? "ponto" : "pontos"}`
+                const content = (
+                  <>
                     <FeedUserAvatar
                       src={creator.avatar}
                       name={creator.name}
@@ -53,9 +55,25 @@ export async function RecommendedUsersPanel() {
                     <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums">
                       {creator.score} {creator.score === 1 ? "pt" : "pts"}
                     </span>
-                  </Link>
-                </li>
-              ))}
+                  </>
+                )
+
+                return (
+                  <li key={creator.id}>
+                    {href ? (
+                      <Link
+                        href={href}
+                        aria-label={`Ver perfil de ${creator.name} (@${creator.username}), ${pointsText}`}
+                        className={`${rowClassName} transition-colors outline-none hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none`}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div className={rowClassName}>{content}</div>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           ) : (
             <p className="p-4 text-xs leading-5 text-muted-foreground">

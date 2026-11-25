@@ -4,16 +4,19 @@ import Link from "next/link"
 import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
 import type { FeedPostData } from "@/lib/feed/types"
+import { profileHref } from "@/lib/profile/routes"
 
 export function FeedPostCard({ post }: { post: FeedPostData }) {
   const cover = post.media[0]
+  const authorHref =
+    post.source === "api" ? profileHref(post.author.username) : null
 
   return (
     <article className="rounded-2xl border border-border">
       <header className="p-4">
-        {post.source === "api" && post.author.username ? (
+        {authorHref ? (
           <Link
-            href={`/profile/${encodeURIComponent(post.author.username)}`}
+            href={authorHref}
             aria-label={`Ver perfil de ${post.author.name}`}
             className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
@@ -38,26 +41,28 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
           {post.content}
         </p>
 
-        <div className="relative mx-4 aspect-video overflow-hidden rounded-xl bg-muted">
-          {cover.type === "image" ? (
-            <Image
-              src={cover.src}
-              alt={cover.alt}
-              fill
-              unoptimized={post.source === "api"}
-              sizes="(max-width: 1024px) calc(100vw - 2rem), (max-width: 1280px) calc(100vw - 9rem), 48rem"
-              className="object-cover"
-            />
-          ) : (
-            <video
-              src={cover.src}
-              poster={cover.poster}
-              aria-label={cover.alt}
-              preload="metadata"
-              className="size-full object-cover"
-            />
-          )}
-        </div>
+        {cover ? (
+          <div className="relative mx-4 aspect-video overflow-hidden rounded-xl bg-muted">
+            {cover.type === "image" ? (
+              <Image
+                src={cover.src}
+                alt={cover.alt}
+                fill
+                unoptimized={post.source === "api"}
+                sizes="(max-width: 1024px) calc(100vw - 2rem), (max-width: 1280px) calc(100vw - 9rem), 48rem"
+                className="object-cover"
+              />
+            ) : (
+              <video
+                src={cover.src}
+                poster={cover.poster}
+                aria-label={cover.alt}
+                preload="metadata"
+                className="size-full object-cover"
+              />
+            )}
+          </div>
+        ) : null}
       </Link>
 
       <footer className="p-4">
