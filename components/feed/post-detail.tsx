@@ -1,10 +1,18 @@
+"use client"
+
 import { ProfileStackBadges } from "@/components/profile/profile-stack-badges"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { PostDiscussion } from "@/components/feed/post-discussion"
 import { FeedUserSummary } from "@/components/feed/feed-user-summary"
 import { PostActions } from "@/components/feed/post-actions"
 import { PostMediaGallery } from "@/components/feed/post-media-gallery"
+import { PostOwnerMenu } from "@/components/feed/post-owner-menu"
+import {
+  applyPostMutation,
+  usePostMutation,
+} from "@/lib/feed/post-mutation-store"
 import type { FeedPostData } from "@/lib/feed/types"
 import { profileHref } from "@/lib/profile/routes"
 import { cn } from "@/lib/utils"
@@ -12,11 +20,26 @@ import { cn } from "@/lib/utils"
 type PostDetailProps = {
   post: FeedPostData
   modal?: boolean
+  onClose?: () => void
 }
 
-export function PostDetail({ post, modal = false }: PostDetailProps) {
+export function PostDetail({ post, modal = false, onClose }: PostDetailProps) {
+  const router = useRouter()
+  const mutation = usePostMutation(post.id)
+  const currentPost = applyPostMutation(post, mutation)
   const authorHref =
-    post.source === "api" ? profileHref(post.author.username) : null
+    currentPost.source === "api"
+      ? profileHref(currentPost.author.username)
+      : null
+
+  function handleDeleted() {
+    if (modal) {
+      if (onClose) onClose()
+      else router.back()
+      return
+    }
+    router.replace("/feed")
+  }
 
   return (
     <article
@@ -27,16 +50,16 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
           : "overflow-hidden rounded-2xl border border-border"
       )}
     >
-      <h1 className="sr-only">Publicação de {post.author.name}</h1>
+      <h1 className="sr-only">Publicação de {currentPost.author.name}</h1>
 
       <PostMediaGallery
-        media={post.media}
+        media={currentPost.media}
         priority
-        unoptimized={post.source === "api"}
+        unoptimized={currentPost.source === "api"}
         className={cn(
           modal && "shrink-0 md:min-h-0 md:overflow-y-auto",
           modal &&
-            post.media.length === 1 &&
+            currentPost.media.length === 1 &&
             "md:flex md:flex-col md:[&>figure]:my-auto md:[&>figure]:shrink-0"
         )}
       />
@@ -57,40 +80,60 @@ export function PostDetail({ post, modal = false }: PostDetailProps) {
             {authorHref ? (
               <Link
                 href={authorHref}
-                aria-label={`Ver perfil de ${post.author.name}`}
+                aria-label={`Ver perfil de ${currentPost.author.name}`}
                 className="block min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 <FeedUserSummary
-                  user={post.author}
-                  technologies={post.technologies}
+                  user={currentPost.author}
+                  technologies={currentPost.technologies}
                   showUsername
                 />
               </Link>
             ) : (
               <FeedUserSummary
-                user={post.author}
-                technologies={post.technologies}
+                user={currentPost.author}
+                technologies={currentPost.technologies}
                 showUsername
               />
             )}
-            <ProfileStackBadges
-              stacks={post.stacks}
-              className="mt-0 max-w-1/2 justify-end gap-0"
-            />
+            <div className="flex max-w-1/2 items-start justify-end gap-1.5">
+              <ProfileStackBadges
+                stacks={currentPost.stacks}
+                className="mt-0 justify-end gap-0"
+              />
+              <PostOwnerMenu post={currentPost} onDeleted={handleDeleted} />
+            </div>
           </div>
 
-          <p className="text-sm leading-6 text-foreground">{post.content}</p>
+          <div className="space-y-2">
+            <p className="text-sm leading-6 whitespace-pre-wrap text-foreground">
+              {currentPost.content}
+            </p>
+            {(currentPost.editedAt ||
+              currentPost.visibility === "seguidores") && (
+              <p className="text-xs text-muted-foreground">
+                {[
+                  currentPost.visibility === "seguidores"
+                    ? "Apenas seguidores"
+                    : null,
+                  currentPost.editedAt ? "Editado" : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
+          </div>
 
           <PostActions
-            postId={post.id}
-            score={post.score}
-            authorName={post.author.name}
-            source={post.source}
+            postId={currentPost.id}
+            score={currentPost.score}
+            authorName={currentPost.author.name}
+            source={currentPost.source}
             eager
           />
         </div>
 
-        <PostDiscussion key={post.id} post={post} modal={modal} />
+        <PostDiscussion key={currentPost.id} post={currentPost} modal={modal} />
       </div>
     </article>
   )
