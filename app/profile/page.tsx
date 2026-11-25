@@ -9,7 +9,7 @@ import { Bookmark, LoaderCircle, Plus, RefreshCw, UserRound } from "lucide-react
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { FeedHeader } from "@/components/feed/feed-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog"
 import { ProfileName } from "@/components/profile/profile-name"
 import { useProfileColor } from "@/components/profile/use-profile-color"
@@ -93,7 +93,7 @@ function ProfilePageContent() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div><p className="mb-1 text-sm font-medium text-primary">@{profile.username}</p><ProfileName name={profile.nome} isPrivate={profile.visibilidadePerfil === "privado"} technologyCount={profile.stacks?.length ?? 0} /></div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link href="/profile/saved" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"><Bookmark aria-hidden="true" className="size-4 text-accent-foreground" />Salvos</Link>
+                      <Link href="/profile/saved" className={buttonVariants({ variant: "outline", className: "h-10 rounded-xl px-4 font-semibold" })}><Bookmark aria-hidden="true" className="size-4 text-accent-foreground" />Salvos</Link>
                       <EditProfileDialog onSaved={setProfile} />
                     </div>
                   </div>
