@@ -495,13 +495,14 @@ export function PostDiscussion({
     <div
       className={cn(
         "flex min-h-0 flex-col border-t border-border",
-        modal && "md:flex-1"
+        modal && "max-md:contents md:flex-1"
       )}
     >
       <div
         className={cn(
           "px-5 py-5 sm:px-6",
-          modal && "md:min-h-0 md:flex-1 md:overflow-y-auto"
+          modal &&
+            "flex-1 max-md:border-t max-md:border-border md:min-h-0 md:overflow-y-auto"
         )}
       >
         <CommentThread
@@ -533,17 +534,24 @@ export function PostDiscussion({
           onDelete={isApiPost ? handleDeleteComment : undefined}
         />
       </div>
-      <PostCommentForm
-        replyTarget={replyTarget}
-        available
-        isSubmitting={isSubmitting}
-        error={submitError}
-        onCancelReply={() => {
-          setReplyTarget(null)
-          setSubmitError("")
-        }}
-        onComment={submitComment}
-      />
+      <div
+        className={cn(
+          modal &&
+            "shrink-0 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:bg-background max-md:pb-[env(safe-area-inset-bottom)]"
+        )}
+      >
+        <PostCommentForm
+          replyTarget={replyTarget}
+          available
+          isSubmitting={isSubmitting}
+          error={submitError}
+          onCancelReply={() => {
+            setReplyTarget(null)
+            setSubmitError("")
+          }}
+          onComment={submitComment}
+        />
+      </div>
       <p role="status" className="sr-only">
         {announcement}
       </p>

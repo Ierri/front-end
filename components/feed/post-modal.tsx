@@ -14,7 +14,7 @@ export function PostModal({
       onClose={onClose}
       title={`Publicação de ${post.author.name}`}
       closeLabel="Fechar publicação"
-      popupClassName="overflow-hidden md:h-[min(90svh,58rem)] md:w-[min(96vw,92rem)]"
+      popupClassName="h-dvh overflow-hidden md:h-[min(90svh,58rem)] md:w-[min(96vw,92rem)]"
     >
       <PostDetail post={post} modal />
     </FeedRouteModal>
