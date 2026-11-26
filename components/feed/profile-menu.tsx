@@ -119,8 +119,10 @@ export function ProfileMenu() {
               onClick={handleNavigateClick}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "h-auto w-full justify-start gap-3 px-2 py-2.5 hover:bg-foreground/10 dark:hover:bg-background",
-                isProfileActive && "bg-accent text-accent-foreground",
+                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                isProfileActive
+                  ? "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent"
+                  : "hover:bg-foreground/10 dark:hover:bg-foreground/10",
                 leaving && "pointer-events-none opacity-50"
               )}
             >
@@ -135,8 +137,10 @@ export function ProfileMenu() {
               onClick={handleNavigateClick}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "h-auto w-full justify-start gap-3 px-2 py-2.5 hover:bg-foreground/10 dark:hover:bg-background",
-                isSavedActive && "bg-accent text-accent-foreground",
+                "h-auto w-full justify-start gap-3 px-2 py-2.5",
+                isSavedActive
+                  ? "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent"
+                  : "hover:bg-foreground/10 dark:hover:bg-foreground/10",
                 leaving && "pointer-events-none opacity-50"
               )}
             >
@@ -149,7 +153,7 @@ export function ProfileMenu() {
               variant="destructive"
               disabled={leaving}
               onClick={logout}
-              className="h-10 w-full justify-center gap-2 rounded-lg hover:bg-destructive/20 dark:hover:bg-background"
+              className="h-10 w-full justify-center gap-2 rounded-lg hover:bg-destructive/20 dark:hover:bg-destructive/30"
             >
               {leaving ? "Saindo…" : "Sair da conta"}
             </Button>

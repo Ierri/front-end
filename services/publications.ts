@@ -1,7 +1,7 @@
 import { stackSchema } from "@/services/profiles"
 import { z } from "zod"
 
-import type { FeedPostData } from "@/lib/feed/types"
+import type { FeedPostData, FeedVisibility } from "@/lib/feed/types"
 import {
   ApiError,
   apiRequest,
@@ -93,6 +93,8 @@ export function toFeedPost(
       fictitious: false,
     },
     content: publication.conteudo,
+    visibility: publication.visibilidade,
+    editedAt: publication.editadaEm,
     technologies: [],
     stacks: publication.stacks,
     media: [...publication.midias]
@@ -101,6 +103,7 @@ export function toFeedPost(
         id: media.id,
         type: media.tipo === "imagem" ? "image" : "video",
         src: media.url,
+        sizeBytes: media.tamanhoBytes,
         alt:
           media.textoAlternativo ??
           `Mídia ${index + 1} da publicação de ${publication.autor.nome}`,
@@ -110,6 +113,8 @@ export function toFeedPost(
     commentCount: publication.contadores.comentarios,
   }
 }
+
+export type PublicationMediaEdit = { id: string } | { referencia: string }
 
 export const publicationsService = {
   async list({
@@ -195,5 +200,66 @@ export const publicationsService = {
       signal,
     })
     return toFeedPost(result.data)
+  },
+
+  async update(
+    id: string,
+    {
+      content,
+      visibility,
+      stackIds,
+      media,
+      signal,
+    }: {
+      content?: string
+      visibility?: FeedVisibility
+      stackIds?: string[]
+      media?: PublicationMediaEdit[]
+      signal?: AbortSignal
+    }
+  ): Promise<FeedPostData> {
+    const publicationId = assertObjectId(id)
+    const body: {
+      conteudo?: string
+      visibilidade?: FeedVisibility
+      stackIds?: string[]
+      midias?: PublicationMediaEdit[]
+    } = {}
+    if (content !== undefined) {
+      const trimmed = content.trim()
+      if (!trimmed) {
+        throw new ApiError(
+          "O conteúdo da publicação não pode ficar vazio.",
+          "VALIDATION_ERROR"
+        )
+      }
+      body.conteudo = trimmed
+    }
+    if (visibility !== undefined) {
+      body.visibilidade = visibility
+    }
+    if (stackIds !== undefined) body.stackIds = stackIds
+    if (media !== undefined) body.midias = media
+    if (!Object.keys(body).length) {
+      throw new ApiError("Nenhuma alteração informada.", "VALIDATION_ERROR")
+    }
+    const result = await apiRequest(
+      `/publicacoes/${publicationId}`,
+      publicationSchema,
+      {
+        method: "PATCH",
+        body,
+        signal,
+      }
+    )
+    return toFeedPost(result.data)
+  },
+
+  async remove(id: string, signal?: AbortSignal): Promise<void> {
+    const publicationId = assertObjectId(id)
+    await apiRequest(`/publicacoes/${publicationId}`, z.null(), {
+      method: "DELETE",
+      signal,
+    })
   },
 }

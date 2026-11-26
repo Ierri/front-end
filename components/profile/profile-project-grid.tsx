@@ -7,7 +7,103 @@ import { Heart, MessageCircle } from "lucide-react"
 
 import { PostModal } from "@/components/feed/post-modal"
 import { technologyCatalog } from "@/components/feed/technology-icon-list"
+import {
+  applyPostMutation,
+  usePostMutation,
+} from "@/lib/feed/post-mutation-store"
 import type { FeedPostData } from "@/lib/feed/types"
+
+function ProfileProjectTile({
+  post,
+  onOpen,
+}: {
+  post: FeedPostData
+  onOpen: (post: FeedPostData) => void
+}) {
+  const mutation = usePostMutation(post.id)
+  if (mutation.deleted) return null
+
+  const currentPost = applyPostMutation(post, mutation)
+  const cover = currentPost.media[0]
+  const isApiPost = currentPost.source === "api"
+  const commentCount = currentPost.commentCount ?? currentPost.comments.length
+
+  return (
+    <li className="min-w-0">
+      <Link
+        href={`/feed/post/${currentPost.id}`}
+        aria-haspopup="dialog"
+        onNavigate={(event) => {
+          event.preventDefault()
+          onOpen(currentPost)
+        }}
+        aria-label={`Abrir publicação de ${currentPost.author.name}`}
+        className="group block rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+          {cover?.type === "video" ? (
+            <video
+              src={cover.src}
+              poster={cover.poster}
+              aria-label={cover.alt}
+              preload="metadata"
+              className="size-full object-cover"
+            />
+          ) : cover ? (
+            <Image
+              src={cover.src}
+              alt={cover.alt}
+              fill
+              unoptimized={isApiPost}
+              sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
+            />
+          ) : null}
+        </div>
+
+        <div className="flex items-start justify-between gap-3 pt-3">
+          <div className="min-w-0">
+            <p className="line-clamp-2 text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-accent-foreground">
+              {currentPost.content}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3 pt-1 text-xs text-muted-foreground">
+            <span
+              className="inline-flex items-center gap-1"
+              aria-label={`${currentPost.score} votos`}
+            >
+              <Heart aria-hidden="true" className="size-3.5" />
+              {currentPost.score}
+            </span>
+            <span
+              className="inline-flex items-center gap-1"
+              aria-label={`${commentCount} comentários`}
+            >
+              <MessageCircle aria-hidden="true" className="size-3.5" />
+              {commentCount}
+            </span>
+          </div>
+        </div>
+
+        {currentPost.technologies.length > 0 && (
+          <ul
+            aria-label={`Tecnologias da publicação de ${currentPost.author.name}`}
+            className="mt-3 flex flex-wrap gap-1.5"
+          >
+            {currentPost.technologies.map((technology) => (
+              <li
+                key={technology}
+                className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+              >
+                {technologyCatalog[technology].label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Link>
+    </li>
+  )
+}
 
 export function ProfileProjectGrid({
   posts,
@@ -36,87 +132,9 @@ export function ProfileProjectGrid({
   return (
     <>
       <ul className="grid gap-x-5 gap-y-9 sm:grid-cols-2 xl:grid-cols-3">
-        {posts.map((post) => {
-          const cover = post.media[0]
-          const isApiPost = post.source === "api"
-          const commentCount = post.commentCount ?? post.comments.length
-
-          return (
-            <li key={post.id} className="min-w-0">
-              <Link
-                href={`/feed/post/${post.id}`}
-                aria-haspopup="dialog"
-                onNavigate={(event) => {
-                  event.preventDefault()
-                  setOpenPost(post)
-                }}
-                aria-label={`Abrir publicação de ${post.author.name}`}
-                className="group block rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
-                  {cover?.type === "video" ? (
-                    <video
-                      src={cover.src}
-                      poster={cover.poster}
-                      aria-label={cover.alt}
-                      preload="metadata"
-                      className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.025]"
-                    />
-                  ) : cover ? (
-                    <Image
-                      src={cover.src}
-                      alt={cover.alt}
-                      fill
-                      unoptimized={isApiPost}
-                      sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.025]"
-                    />
-                  ) : null}
-                </div>
-
-                <div className="flex items-start justify-between gap-3 pt-3">
-                  <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-accent-foreground">
-                      {post.content}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3 pt-1 text-xs text-muted-foreground">
-                    <span
-                      className="inline-flex items-center gap-1"
-                      aria-label={`${post.score} votos`}
-                    >
-                      <Heart aria-hidden="true" className="size-3.5" />
-                      {post.score}
-                    </span>
-                    <span
-                      className="inline-flex items-center gap-1"
-                      aria-label={`${commentCount} comentários`}
-                    >
-                      <MessageCircle aria-hidden="true" className="size-3.5" />
-                      {commentCount}
-                    </span>
-                  </div>
-                </div>
-
-                {post.technologies.length > 0 && (
-                  <ul
-                    aria-label={`Tecnologias da publicação de ${post.author.name}`}
-                    className="mt-3 flex flex-wrap gap-1.5"
-                  >
-                    {post.technologies.map((technology) => (
-                      <li
-                        key={technology}
-                        className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
-                      >
-                        {technologyCatalog[technology].label}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Link>
-            </li>
-          )
-        })}
+        {posts.map((post) => (
+          <ProfileProjectTile key={post.id} post={post} onOpen={setOpenPost} />
+        ))}
       </ul>
       {openPost && (
         <PostModal post={openPost} onClose={() => setOpenPost(null)} />

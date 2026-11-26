@@ -55,7 +55,7 @@ export default async function FeedPage({
   }
 
   const content = (
-    <main className="mx-auto grid w-full max-w-[1350px] xl:grid-cols-[minmax(0,1fr)_22rem] xl:gap-6 xl:px-8">
+    <main className="mx-auto grid w-full max-w-[1350px] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_22rem] xl:gap-6 xl:px-8">
       <section
         aria-label={
           isFollowingTab
@@ -64,15 +64,15 @@ export default async function FeedPage({
               ? "Feed das publicações mais votadas"
               : "Feed de publicações"
         }
-        className="px-4 pt-6 pb-10 sm:px-6 lg:px-8 xl:px-0"
+        className="min-w-0 px-4 pt-6 pb-10 sm:px-6 lg:px-8 xl:px-0"
       >
-        <div className="mx-auto max-w-3xl space-y-6">
+        <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
           {isFollowingTab ? (
             <FollowingFeedSection />
           ) : (
             <>
               {isTopTab && rankedCreators.length > 0 && (
-                <div className="flex min-h-28 min-w-0 items-center [&>article]:w-full [&>section]:w-full">
+                <div className="w-full min-w-0">
                   <TopPostsRanking creators={rankedCreators} />
                 </div>
               )}

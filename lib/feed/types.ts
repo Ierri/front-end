@@ -24,9 +24,11 @@ export type FeedMediaData = {
   src: string
   alt: string
   poster?: string
+  sizeBytes?: number
 }
 
 export type FeedCommentStatus = "publicado" | "excluido" | "oculto"
+export type FeedVisibility = "publico" | "seguidores"
 
 export type FeedCommentData = {
   id: string
@@ -50,6 +52,8 @@ export type FeedPostData = {
   source?: "demo" | "api"
   author: FeedUserData
   content: string
+  visibility?: FeedVisibility
+  editedAt?: string | null
   technologies: TechnologyKey[]
   media: FeedMediaData[]
   score: number

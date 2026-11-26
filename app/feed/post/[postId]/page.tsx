@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { PostBackButton } from "@/components/feed/post-back-button"
-import { PostDetail } from "@/components/feed/post-detail"
+import { PostModal } from "@/components/feed/post-modal"
+import FeedPage from "../../page"
 import { getFeedPost } from "@/lib/feed/get-feed-post"
 
 type PostPageProps = {
   params: Promise<{ postId: string }>
+  searchParams: Promise<{ tab?: string; autorId?: string }>
 }
 
 export async function generateMetadata({
@@ -23,16 +24,16 @@ export async function generateMetadata({
   }
 }
 
-export default async function PostPage({ params }: PostPageProps) {
+export default async function PostPage({ params, searchParams }: PostPageProps) {
   const { postId } = await params
   const post = await getFeedPost(postId)
 
   if (!post) notFound()
 
   return (
-    <main className="mx-auto w-full max-w-[92rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <PostBackButton />
-      <PostDetail post={post} />
-    </main>
+    <>
+      <FeedPage searchParams={searchParams} />
+      <PostModal post={post} closeHref="/feed" />
+    </>
   )
 }

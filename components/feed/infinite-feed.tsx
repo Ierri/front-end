@@ -77,7 +77,13 @@ export function InfiniteFeed({
   return (
     <>
       {posts.length ? (
-        posts.map((post) => <FeedPostCard key={post.id} post={post} />)
+        posts.map((post, index) => (
+          <FeedPostCard
+            key={post.id}
+            post={post}
+            prioritizeCover={index === 0}
+          />
+        ))
       ) : !error && !isLoading && !isLoadingMore && !hasMore ? (
         <FeedEmptyState
           title={

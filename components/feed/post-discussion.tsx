@@ -110,6 +110,18 @@ function updateCommentInTree(
   )
 }
 
+function removeCommentFromTree(
+  comments: FeedCommentData[],
+  targetId: string
+): FeedCommentData[] {
+  return comments
+    .filter((comment) => comment.id !== targetId)
+    .map((comment) => ({
+      ...comment,
+      replies: removeCommentFromTree(comment.replies, targetId),
+    }))
+}
+
 export function PostDiscussion({
   post,
   modal,
@@ -463,12 +475,7 @@ export function PostDiscussion({
       await commentsService.remove(commentId)
       if (!mountedRef.current) return null
       setThread((current) => ({
-        items: updateCommentInTree(current.items, commentId, (item) => ({
-          ...item,
-          status: "excluido",
-          content: "Comentário removido",
-          editedAt: null,
-        })),
+        items: removeCommentFromTree(current.items, commentId),
         totalCount:
           current.totalCount === undefined
             ? undefined
@@ -534,24 +541,26 @@ export function PostDiscussion({
           onDelete={isApiPost ? handleDeleteComment : undefined}
         />
       </div>
-      <div
-        className={cn(
-          modal &&
-            "shrink-0 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:bg-background max-md:pb-[env(safe-area-inset-bottom)]"
-        )}
-      >
-        <PostCommentForm
-          replyTarget={replyTarget}
-          available
-          isSubmitting={isSubmitting}
-          error={submitError}
-          onCancelReply={() => {
-            setReplyTarget(null)
-            setSubmitError("")
-          }}
-          onComment={submitComment}
-        />
-      </div>
+      {status === "authenticated" && (
+        <div
+          className={cn(
+            modal &&
+              "shrink-0 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:bg-background max-md:pb-[env(safe-area-inset-bottom)]"
+          )}
+        >
+          <PostCommentForm
+            replyTarget={replyTarget}
+            available
+            isSubmitting={isSubmitting}
+            error={submitError}
+            onCancelReply={() => {
+              setReplyTarget(null)
+              setSubmitError("")
+            }}
+            onComment={submitComment}
+          />
+        </div>
+      )}
       <p role="status" className="sr-only">
         {announcement}
       </p>

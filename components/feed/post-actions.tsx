@@ -34,6 +34,11 @@ type PostActionsProps = {
   className?: string
 }
 
+const actionBadgeClass =
+  "inline-flex items-center rounded-full border border-border"
+const selectedActionClass =
+  "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
+
 export function PostActions({
   postId,
   score,
@@ -273,7 +278,7 @@ export function PostActions({
         <div
           role="group"
           aria-label={`Votação da publicação de ${authorName}`}
-          className="inline-flex items-center rounded-full border border-border"
+          className={actionBadgeClass}
         >
           <Button
             type="button"
@@ -285,8 +290,7 @@ export function PostActions({
             onClick={() => void handleVote(1)}
             className={cn(
               "rounded-full transition-colors motion-reduce:transition-none",
-              myVote === 1 &&
-                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
+              myVote === 1 && selectedActionClass
             )}
           >
             <ArrowBigUp className={cn(myVote === 1 && "fill-current")} />
@@ -318,22 +322,23 @@ export function PostActions({
           </Button>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          disabled={isSaving}
-          aria-pressed={isSaved}
-          aria-label={isSaved ? "Remover dos salvos" : "Salvar publicação"}
-          onClick={() => void handleToggleSave()}
-          className={cn(
-            "rounded-full transition-colors motion-reduce:transition-none",
-            isSaved &&
-              "border-primary/40 bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:border-primary dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
-          )}
-        >
-          <Bookmark className={cn(isSaved && "fill-current")} />
-        </Button>
+        <div className={actionBadgeClass}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={isSaving}
+            aria-pressed={isSaved}
+            aria-label={isSaved ? "Remover dos salvos" : "Salvar publicação"}
+            onClick={() => void handleToggleSave()}
+            className={cn(
+              "rounded-full transition-colors motion-reduce:transition-none",
+              isSaved && selectedActionClass
+            )}
+          >
+            <Bookmark className={cn(isSaved && "fill-current")} />
+          </Button>
+        </div>
       </div>
       {error && (
         <p role="alert" className="text-xs text-destructive">

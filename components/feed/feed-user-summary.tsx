@@ -10,6 +10,7 @@ type FeedUserSummaryProps = {
   technologies: TechnologyKey[]
   profileHref?: string
   compact?: boolean
+  showUsername?: boolean
   className?: string
 }
 
@@ -18,6 +19,7 @@ export function FeedUserSummary({
   technologies,
   profileHref,
   compact = false,
+  showUsername = false,
   className,
 }: FeedUserSummaryProps) {
   const profileLinkClass =
@@ -57,6 +59,11 @@ export function FeedUserSummary({
         ) : (
           <p className="text-sm leading-5 font-semibold [overflow-wrap:anywhere]">
             {user.name}
+          </p>
+        )}
+        {showUsername && user.username && (
+          <p className="text-xs leading-4 text-muted-foreground [overflow-wrap:anywhere]">
+            @{user.username}
           </p>
         )}
         {technologies.length > 0 && (
