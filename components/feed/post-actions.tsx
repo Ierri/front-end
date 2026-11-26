@@ -13,6 +13,8 @@ import {
   getEmptyPostInteractionSnapshot,
   getPostInteractionSnapshot,
   hydratePostInteractions,
+  releasePostRealtime,
+  retainPostRealtime,
   rollbackSaveMutation,
   rollbackVoteMutation,
   subscribePostInteractions,
@@ -32,7 +34,8 @@ type PostActionsProps = {
   className?: string
 }
 
-const actionBadgeClass = "inline-flex items-center rounded-full border border-border"
+const actionBadgeClass =
+  "inline-flex items-center rounded-full border border-border"
 const selectedActionClass =
   "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
 
@@ -86,6 +89,41 @@ export function PostActions({
       requireAuth()
     }
   }, [requireAuth, status])
+
+  useEffect(() => {
+    if (!isApiPost) return
+    if (eager) {
+      retainPostRealtime(postId)
+      return () => releasePostRealtime(postId)
+    }
+    const node = containerRef.current
+    if (!node || typeof IntersectionObserver === "undefined") {
+      retainPostRealtime(postId)
+      return () => releasePostRealtime(postId)
+    }
+    let retained = false
+    const observer = new IntersectionObserver(
+      (observerEntries) => {
+        const visible = Boolean(observerEntries[0]?.isIntersecting)
+        if (visible && !retained) {
+          retained = true
+          retainPostRealtime(postId)
+        } else if (!visible && retained) {
+          retained = false
+          releasePostRealtime(postId)
+        }
+      },
+      { rootMargin: "150px 0px" }
+    )
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      if (retained) {
+        retained = false
+        releasePostRealtime(postId)
+      }
+    }
+  }, [eager, isApiPost, postId])
 
   useEffect(() => {
     if (!isApiPost || !userId) return
@@ -252,8 +290,7 @@ export function PostActions({
             onClick={() => void handleVote(1)}
             className={cn(
               "rounded-full transition-colors motion-reduce:transition-none",
-              myVote === 1 &&
-                selectedActionClass
+              myVote === 1 && selectedActionClass
             )}
           >
             <ArrowBigUp className={cn(myVote === 1 && "fill-current")} />
