@@ -13,6 +13,8 @@ import {
   getEmptyPostInteractionSnapshot,
   getPostInteractionSnapshot,
   hydratePostInteractions,
+  releasePostRealtime,
+  retainPostRealtime,
   rollbackSaveMutation,
   rollbackVoteMutation,
   subscribePostInteractions,
@@ -82,6 +84,41 @@ export function PostActions({
       requireAuth()
     }
   }, [requireAuth, status])
+
+  useEffect(() => {
+    if (!isApiPost) return
+    if (eager) {
+      retainPostRealtime(postId)
+      return () => releasePostRealtime(postId)
+    }
+    const node = containerRef.current
+    if (!node || typeof IntersectionObserver === "undefined") {
+      retainPostRealtime(postId)
+      return () => releasePostRealtime(postId)
+    }
+    let retained = false
+    const observer = new IntersectionObserver(
+      (observerEntries) => {
+        const visible = Boolean(observerEntries[0]?.isIntersecting)
+        if (visible && !retained) {
+          retained = true
+          retainPostRealtime(postId)
+        } else if (!visible && retained) {
+          retained = false
+          releasePostRealtime(postId)
+        }
+      },
+      { rootMargin: "150px 0px" }
+    )
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      if (retained) {
+        retained = false
+        releasePostRealtime(postId)
+      }
+    }
+  }, [eager, isApiPost, postId])
 
   useEffect(() => {
     if (!isApiPost || !userId) return
@@ -292,7 +329,7 @@ export function PostActions({
           className={cn(
             "rounded-full transition-colors motion-reduce:transition-none",
             isSaved &&
-              "border-primary/40 bg-accent dark:border-primary text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
+              "border-primary/40 bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground dark:border-primary dark:bg-primary dark:text-background dark:hover:bg-primary/85 dark:hover:text-background"
           )}
         >
           <Bookmark className={cn(isSaved && "fill-current")} />
